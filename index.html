@@ -1,0 +1,1556 @@
+<title>Health Heroes</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Baloo+Bhaijaan+2:wght@500;700;800&family=Nunito:wght@500;700;800&family=Cairo:wght@500;700;800&display=swap">
+<style>
+/* Layout concept: a sunny adventure map. Sticky pill header, bottom game-nav, big chunky 3D buttons, full-screen mission stage per world colour. Single bright look by choice. */
+:root{
+  --sky:#BFE9FF; --sky2:#EAF8FF; --ink:#1E2A5E; --ink2:#46528A; --paper:#FFFFFF; --line:#D5E3F4;
+  --sun:#FFC93C; --sun-d:#E0A100; --coral:#FF6B5E; --coral-d:#D9453A; --grass:#4FC667; --grass-d:#2E9A47; --blue:#2BA8E8; --blue-d:#1B7FB8; --violet:#8D6BFF; --violet-d:#6445D6; --orange:#FF9A2E; --orange-d:#D87306;
+  --good:#1E9A4A; --goodbg:#DDF8E4; --bad:#C23B3B; --badbg:#FFE3E0;
+  --font-d:"Baloo 2","Baloo Bhaijaan 2","Trebuchet MS",system-ui,sans-serif;
+  --font-b:"Nunito","Cairo",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --wc:#2BA8E8; --wcd:#176E9E; --wcl:#D7F1FF;
+}
+:root[lang="ar"]{--font-d:"Baloo Bhaijaan 2","Baloo 2","Tahoma",system-ui,sans-serif;--font-b:"Cairo","Nunito","Tahoma",system-ui,sans-serif}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{background:var(--sky2);color:var(--ink);font-family:var(--font-b);font-size:17px;line-height:1.5;-webkit-tap-highlight-color:transparent;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:#fff;z-index:40}
+h1,h2,h3,h4{font-family:var(--font-d);line-height:1.15;margin:0;text-wrap:balance;color:var(--ink)}
+p{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,[tabindex]:focus-visible,a:focus-visible{outline:4px solid var(--violet);outline-offset:3px}
+.in{max-width:1100px;margin-inline:auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* animated backdrop */
+.bgfx{position:fixed;inset:0;z-index:-1;overflow:hidden;background:linear-gradient(180deg,#9EDDFF 0%,#D8F3FF 55%,#EFFBF1 100%)}
+.cloud{position:absolute;width:170px;height:54px;background:#fff;border-radius:60px;opacity:.9;animation:drift 60s linear infinite}
+.cloud::before,.cloud::after{content:"";position:absolute;background:#fff;border-radius:50%}
+.cloud::before{width:70px;height:70px;left:26px;top:-34px}.cloud::after{width:52px;height:52px;left:88px;top:-22px}
+.cloud.c1{top:12%;left:-200px}.cloud.c2{top:28%;left:-200px;animation-duration:90s;animation-delay:-35s;transform:scale(.7)}.cloud.c3{top:6%;left:-200px;animation-duration:75s;animation-delay:-60s;transform:scale(.5)}
+@keyframes drift{to{translate:calc(100vw + 400px) 0}}
+.hills{position:absolute;left:0;right:0;bottom:0;height:22vh;min-height:110px}
+.hills svg{width:100%;height:100%;display:block}
+
+/* header */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:#fff;box-shadow:0 4px 0 rgba(30,42,94,.07)}
+.top .in{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-block:8px}
+.brand{display:flex;align-items:center;gap:8px;background:none;border:0;padding:0;font-family:var(--font-d);font-weight:800;font-size:1.25rem;color:var(--ink)}
+.brand svg{width:42px;height:42px;flex:none}
+.brand span{line-height:1}
+.hud{display:flex;align-items:center;gap:8px}
+.pill{display:inline-flex;align-items:center;gap:6px;background:#FFF3C4;border-radius:999px;padding:4px 12px 4px 8px;font-family:var(--font-d);font-weight:800;font-size:1.05rem;color:#7A5400}
+.pill svg{width:22px;height:22px}
+.ibtn{width:42px;height:42px;border-radius:50%;border:0;background:var(--sky2);display:grid;place-items:center;color:var(--ink)}
+.ibtn svg{width:22px;height:22px}
+.seg{display:inline-flex;background:var(--sky2);border-radius:999px;padding:3px;gap:2px}
+.seg button{border:0;background:none;border-radius:999px;padding:6px 12px;font-family:var(--font-d);font-weight:800;font-size:1rem;color:var(--ink2);min-height:38px}
+.seg button.on{background:var(--ink);color:#fff}
+.seg.big button{font-size:1.2rem;padding:8px 20px;min-height:48px}
+
+main.in{padding-block:20px 120px}
+.view{animation:viewin .35s ease both}
+@keyframes viewin{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+/* bottom nav */
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:#fff;box-shadow:0 -4px 0 rgba(30,42,94,.07);padding-bottom:env(safe-area-inset-bottom,0px)}
+.nav .in{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;padding-block:6px}
+.nav button{display:flex;flex-direction:column;align-items:center;gap:2px;border:0;background:none;border-radius:16px;padding:6px 2px;font-size:.78rem;font-weight:800;color:var(--ink2);min-width:0}
+.nav button svg{width:26px;height:26px}
+.nav button.on{background:#E6F3FF;color:var(--blue-d)}
+
+/* buttons */
+.btn{--c:var(--sun);--cd:var(--sun-d);display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:56px;padding:.55em 1.5em;border:0;border-radius:999px;background:var(--c);color:var(--ink);font-family:var(--font-d);font-weight:800;font-size:1.2rem;box-shadow:0 5px 0 var(--cd);transition:transform .1s,box-shadow .1s;text-align:center}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--cd)}
+.btn.big{min-height:68px;font-size:1.5rem;padding-inline:2em}
+.btn.green{--c:var(--grass);--cd:var(--grass-d);color:#08310F}
+.btn.blue{--c:var(--blue);--cd:var(--blue-d);color:#fff}
+.btn.coral{--c:var(--coral);--cd:var(--coral-d);color:#fff}
+.btn.violet{--c:var(--violet);--cd:var(--violet-d);color:#fff}
+.btn.ghost{--c:#fff;--cd:var(--line);border:3px solid var(--line)}
+.btn:disabled{opacity:.5;box-shadow:none}
+.btn svg{width:24px;height:24px}
+.card{background:var(--paper);border-radius:28px;box-shadow:0 6px 0 rgba(30,42,94,.07),0 16px 34px rgba(30,42,94,.12);padding:20px}
+
+/* home */
+.hero{display:grid;gap:18px;align-items:center;padding-block:8px}
+.hero-text{display:flex;flex-direction:column;gap:16px;align-items:flex-start}
+.tag{font-family:var(--font-d);font-weight:800;color:var(--violet-d);letter-spacing:.02em}
+.hero h1{font-size:clamp(2.1rem,8vw,3.6rem)}
+.hero h1 em{font-style:normal;color:var(--coral-d)}
+.hero-art{position:relative;min-height:330px;display:flex;align-items:flex-end;justify-content:center;gap:6px}
+.hero-art .luna{width:min(48%,230px);cursor:pointer}
+.hero-art .bot{width:min(32%,150px);cursor:pointer;margin-bottom:30px}
+.bubble{position:absolute;top:0;inset-inline-start:6%;max-width:60%;background:#fff;border-radius:22px;padding:10px 14px;font-weight:800;box-shadow:0 5px 0 rgba(30,42,94,.1);z-index:2;font-size:.98rem}
+.bubble::after{content:"";position:absolute;bottom:-12px;inset-inline-start:34px;border:12px solid transparent;border-top-color:#fff;border-bottom:0}
+.sect-h{display:flex;justify-content:space-between;align-items:end;gap:10px;margin:26px 0 12px;flex-wrap:wrap}
+.sect-h h2{font-size:1.7rem}
+.wrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
+.wmini{position:relative;border:0;border-radius:24px;padding:14px 12px 12px;background:var(--wcl);box-shadow:0 6px 0 var(--wc);display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;font-family:var(--font-d);font-weight:800;font-size:1.1rem;color:var(--ink);min-width:0}
+.wmini svg{width:78px;height:78px}
+.wmini.lock{filter:grayscale(.85);opacity:.8}
+.dots{display:flex;gap:5px;justify-content:center}
+.dots i{width:12px;height:12px;border-radius:50%;background:rgba(30,42,94,.18)}
+.dots i.on{background:var(--wcd)}
+.lockbadge{position:absolute;top:8px;inset-inline-end:8px;background:var(--ink);color:#fff;border-radius:999px;width:30px;height:30px;display:grid;place-items:center}
+.lockbadge svg{width:16px;height:16px;width:16px}
+.bar{height:18px;background:#E3ECF7;border-radius:99px;overflow:hidden}
+.bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--sun),var(--orange));border-radius:99px;transition:width .6s}
+.stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.stat{background:#fff;border-radius:22px;padding:14px;text-align:center;box-shadow:0 5px 0 rgba(30,42,94,.07)}
+.stat b{display:block;font-family:var(--font-d);font-size:2rem;line-height:1.1}
+.stat span{color:var(--ink2);font-weight:700;font-size:.92rem}
+
+/* age */
+.agegrid{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));margin-top:16px}
+.agecard{border:0;text-align:center;display:flex;flex-direction:column;gap:10px;align-items:center;padding:24px 18px}
+.agecard h3{font-size:2rem}
+.agecard .big-n{font-family:var(--font-d);font-weight:800;font-size:4.5rem;line-height:1;color:var(--wcd)}
+.agecard.sel{outline:5px solid var(--sun)}
+
+/* map */
+.map{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));margin-top:14px}
+.wcard{position:relative;display:flex;flex-direction:column;gap:10px;border:0;text-align:start;border-radius:30px;padding:18px;background:linear-gradient(160deg,var(--wcl),#fff 85%);box-shadow:0 8px 0 var(--wc),0 18px 30px rgba(30,42,94,.12);color:var(--ink);min-width:0}
+.wcard .top-r{display:flex;align-items:center;gap:12px}
+.wcard svg.wic{width:92px;height:92px;flex:none}
+.wcard h3{font-size:1.6rem}
+.wcard p{color:var(--ink2);font-weight:700;font-size:.95rem}
+.wcard.lock{filter:grayscale(.9);opacity:.85}
+.step-n{position:absolute;top:-12px;inset-inline-start:16px;background:var(--wcd);color:#fff;font-family:var(--font-d);font-weight:800;border-radius:999px;padding:0 14px;font-size:1.1rem}
+@media(min-width:900px){.map .wcard:nth-child(even){margin-top:34px}}
+.banner{display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:space-between;background:#fff;border-radius:26px;padding:16px 18px;box-shadow:0 6px 0 rgba(30,42,94,.07);margin-top:14px}
+.banner .bt{flex:1 1 240px;min-width:0}
+.banner h3{font-size:1.4rem}
+.banner p{color:var(--ink2);font-weight:700}
+
+/* world page */
+.wbanner{background:var(--wcd);color:#fff;border-radius:32px;padding:20px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;box-shadow:0 8px 0 rgba(0,0,0,.15)}
+.wbanner svg.wic{width:110px;height:110px;flex:none;background:#fff;border-radius:30px;padding:8px}
+.wbanner h1{color:#fff;font-size:clamp(1.9rem,7vw,2.8rem)}
+.wbanner p{font-weight:700;opacity:.95}
+.wbanner .tx{flex:1 1 220px;min-width:0}
+.back{display:inline-flex;align-items:center;gap:6px;border:0;background:#fff;border-radius:999px;padding:6px 16px 6px 10px;font-weight:800;margin-bottom:12px;box-shadow:0 3px 0 rgba(30,42,94,.1);min-height:44px}
+.back svg{width:20px;height:20px}
+[dir="rtl"] .back svg,[dir="rtl"] .rtlflip{transform:scaleX(-1)}
+.mgrid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));margin-top:16px}
+.mcard{display:flex;flex-direction:column;gap:6px;align-items:flex-start;border:0;text-align:start;background:#fff;border-radius:26px;padding:16px;box-shadow:0 6px 0 var(--wc);min-width:0;position:relative}
+.mcard .me{font-size:2.6rem;line-height:1;width:68px;height:68px;border-radius:20px;display:grid;place-items:center;background:var(--wcl)}
+.mcard h3{font-size:1.3rem}
+.mcard .st{margin-top:auto;display:flex;gap:2px}
+.mcard .st svg{width:24px;height:24px}
+.mcard.done::after{content:"";position:absolute;top:12px;inset-inline-end:12px;width:30px;height:30px;border-radius:50%;background:var(--grass) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/70% no-repeat}
+.mcard.quizc{background:linear-gradient(160deg,#FFF6D2,#fff)}
+.mcard.quizc.lock{filter:grayscale(.8);opacity:.8}
+
+/* stage (mission overlay) */
+.stage{position:fixed;inset:0;z-index:60;overflow:auto;background:linear-gradient(180deg,var(--wcl) 0%,#fff 70%);padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);animation:viewin .3s ease both}
+.stage-top{position:sticky;top:0;z-index:5;background:var(--wcd);color:#fff}
+.stage-top .in{display:flex;align-items:center;gap:10px;padding-block:8px}
+.stage-top h2{color:#fff;font-size:1.3rem;flex:1;min-width:0}
+.stage-top .ibtn{background:rgba(255,255,255,.2);color:#fff}
+.stage-top .ibtn.say{background:#fff;color:var(--wcd)}
+.stage .body{padding-block:16px 40px}
+.instr{display:flex;gap:12px;align-items:center;background:#fff;border-radius:24px;padding:10px 16px 10px 10px;box-shadow:0 5px 0 rgba(30,42,94,.08);margin-bottom:14px;font-weight:800}
+.instr svg{width:54px;height:54px;flex:none}
+.instr p{min-width:0}
+.game{display:flex;flex-direction:column;gap:14px}
+
+/* generic game bits */
+.qcard{text-align:center;display:flex;flex-direction:column;gap:14px;align-items:center}
+.art-big{font-size:clamp(3.4rem,16vw,6rem);line-height:1.05;min-height:1.2em}
+.qtext{font-size:clamp(1.3rem,5vw,1.9rem)}
+.opts{display:grid;gap:12px;width:100%;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr))}
+.opt{display:flex;align-items:center;justify-content:center;gap:10px;text-align:center;border:3px solid var(--line);background:#fff;border-radius:22px;padding:14px;font-weight:800;font-size:1.1rem;min-height:68px;box-shadow:0 4px 0 var(--line);transition:transform .1s}
+.opt:active{transform:translateY(3px)}
+.opt .oe{font-size:2rem;line-height:1}
+.opt.right{background:var(--goodbg);border-color:var(--good);animation:pop .4s}
+.opt.wrong{background:var(--badbg);border-color:var(--bad);animation:shake .4s;opacity:.8}
+.fb{min-height:1.5em;font-weight:800;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:center;border-radius:20px;padding:0}
+.fb.good,.fb.bad{padding:12px 16px;width:100%}
+.fb.good{background:var(--goodbg);color:#0F5A2B}
+.fb.bad{background:var(--badbg);color:#8A1F1F}
+.prog{display:flex;gap:6px;justify-content:center}
+.prog i{width:14px;height:14px;border-radius:50%;background:#DCE6F3}
+.prog i.d{background:var(--grass)}.prog i.c{background:var(--sun);transform:scale(1.25)}
+.tray{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;padding:12px;background:rgba(255,255,255,.7);border-radius:26px;min-height:100px}
+.drag{position:relative;width:92px;min-height:92px;padding:6px 4px;border-radius:22px;background:#fff;border:3px solid var(--line);box-shadow:0 4px 0 var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;transition:transform .15s}
+.drag .de{font-size:2.5rem;line-height:1}
+.drag small{font-size:.72rem;font-weight:800;line-height:1.1;text-align:center;color:var(--ink2)}
+body[data-age="young"] .drag{width:108px;min-height:108px}
+body[data-age="young"] .drag .de{font-size:3.1rem}
+.drag.used{display:none}
+.drag.lifted{opacity:.3}
+.drag.sel{outline:5px solid var(--sun);transform:scale(1.08)}
+.ghost{position:fixed;z-index:300;pointer-events:none;transform:scale(1.15) rotate(5deg);box-shadow:0 14px 24px rgba(0,0,0,.25)}
+.has-sel .drop{animation:throb 1s ease-in-out infinite}
+@keyframes throb{50%{border-color:var(--sun);transform:scale(1.015)}}
+.drop{border:4px dashed var(--wc);border-radius:26px;background:rgba(255,255,255,.75);transition:transform .15s,background .2s}
+.drop.good{animation:pop .4s;background:var(--goodbg)}
+.drop.bad{animation:shake .4s;background:var(--badbg)}
+.bins{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))}
+.bin{padding:10px;min-height:150px;display:flex;flex-direction:column;gap:8px;border-color:var(--bc,var(--wc))}
+.bin-h{font-family:var(--font-d);font-weight:800;font-size:1.25rem;text-align:center}
+.bin-items{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.chip{font-size:1.9rem;background:#fff;border-radius:16px;padding:2px 8px;animation:pop .4s}
+.counter{font-family:var(--font-d);font-weight:800;text-align:center;font-size:1.2rem}
+.say-bot{display:flex;gap:10px;align-items:center;justify-content:center;font-weight:800;color:var(--ink2);text-align:center}
+
+/* scenes */
+.scene{width:100%;max-height:62vh;border-radius:28px;background:#fff;box-shadow:0 6px 0 rgba(30,42,94,.08);display:block}
+.scene .hit{cursor:pointer;fill:transparent}
+.scene text{user-select:none;-webkit-user-select:none;pointer-events:none}
+.ring{fill:none;stroke:var(--grass);stroke-width:7;stroke-dasharray:6 6;animation:spin 6s linear infinite;transform-box:fill-box;transform-origin:center}
+.info{min-height:64px;background:#fff;border-radius:22px;padding:12px 16px;font-weight:800;text-align:center;box-shadow:0 4px 0 rgba(30,42,94,.07)}
+.info.good{background:var(--goodbg);color:#0F5A2B}.info.warn{background:#FFF3C4;color:#6B4A00}
+
+/* video */
+.vid{border-radius:30px;overflow:hidden;background:linear-gradient(180deg,#BFE9FF,#E9F8FF 70%,#CFF2D3 70%);position:relative;min-height:300px;box-shadow:0 8px 0 rgba(30,42,94,.1)}
+.vid .vbar{position:absolute;top:0;left:0;right:0;height:8px;background:rgba(30,42,94,.12);z-index:3}
+.vid .vbar i{display:block;height:100%;width:0;background:var(--coral)}
+.vstage{position:relative;height:260px}
+.actor{position:absolute;line-height:1;transform:translate(-50%,-50%)}
+.vluna{position:absolute;inset-inline-start:6px;bottom:-4px;width:96px;z-index:2}
+.vcap{background:#fff;padding:14px 16px;font-weight:800;font-size:1.15rem;text-align:center;min-height:74px;display:flex;align-items:center;justify-content:center}
+.vctl{display:flex;gap:8px;justify-content:center;padding:8px;background:#F3F8FF}
+.vq{position:absolute;inset:8px 0 0;background:rgba(255,255,255,.97);z-index:4;padding:14px;overflow:auto;display:flex;flex-direction:column;gap:10px;align-items:center;justify-content:center;text-align:center}
+.vq .tagp{background:var(--coral);color:#fff;border-radius:999px;padding:2px 14px;font-family:var(--font-d);font-weight:800}
+.a-bounce{animation:bounce .9s ease-in-out infinite}
+.a-shake{animation:shake .5s ease-in-out infinite}
+.a-float{animation:floaty 2.6s ease-in-out infinite}
+.a-spin{animation:spin 3s linear infinite}
+.a-pulse{animation:pulse 1s ease-in-out infinite}
+.a-slide{animation:slide 2.6s ease-in-out infinite alternate}
+.a-grow{animation:grow 1.6s ease-in-out infinite alternate}
+.a-fly{animation:fly 2.2s ease-out infinite}
+.float{animation:floaty 3s ease-in-out infinite}
+@keyframes bounce{50%{translate:0 -14px}}
+@keyframes floaty{50%{translate:0 -10px}}
+@keyframes spin{to{rotate:360deg}}
+@keyframes pulse{50%{scale:1.2}}
+@keyframes slide{from{translate:-26px 0}to{translate:26px 0}}
+@keyframes grow{from{scale:.8}to{scale:1.15}}
+@keyframes fly{0%{translate:0 0;opacity:1}100%{translate:90px -40px;opacity:0}}
+@keyframes shake{0%,100%{translate:0}25%{translate:-7px}75%{translate:7px}}
+@keyframes pop{0%{scale:.7}60%{scale:1.12}100%{scale:1}}
+@keyframes wave{0%,100%{rotate:0deg}50%{rotate:-18deg}}
+@keyframes blink{0%,92%,100%{scale:1 1}95%{scale:1 .1}}
+@keyframes antenna{50%{fill:#FFC93C}}
+
+/* characters */
+.arm-wave{transform-box:fill-box;transform-origin:85% 90%;animation:wave 1.4s ease-in-out infinite}
+.eye-blink{transform-box:fill-box;transform-origin:center;animation:blink 4s infinite}
+.bot-float{animation:floaty 2.8s ease-in-out infinite}
+.antenna-dot{animation:antenna 1.4s infinite}
+
+/* handwash */
+.hands{position:relative;height:210px;display:grid;place-items:center;border-radius:28px;background:linear-gradient(180deg,#E4F6FF,#fff);overflow:hidden;touch-action:none}
+.hands .big-hands{font-size:7.5rem;line-height:1;filter:drop-shadow(0 6px 0 rgba(0,0,0,.08))}
+.hands .germ{position:absolute;font-size:2rem;transition:opacity .4s,scale .4s}
+.hands .suds{position:absolute;inset:0;pointer-events:none}
+.hands .suds i{position:absolute;border-radius:50%;background:#fff;border:2px solid #BFE5FF;animation:floaty 2s ease-in-out infinite}
+.scrubbar{height:22px;background:#DDEBFA;border-radius:99px;overflow:hidden}
+.scrubbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--blue),#7ED7FF);transition:width .1s}
+.steps-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.steps-row span{padding:4px 12px;border-radius:999px;background:#fff;font-weight:800;font-size:.92rem;border:2px solid var(--line)}
+.steps-row span.on{background:var(--sun);border-color:var(--sun-d)}
+.steps-row span.ok{background:var(--goodbg);border-color:var(--good)}
+.glow{animation:glow 1s ease-in-out infinite}
+@keyframes glow{50%{box-shadow:0 0 0 8px rgba(255,201,60,.6)}}
+
+/* teeth */
+.mouth{background:#FF8FA3;border-radius:50% 50% 46% 46%/34% 34% 66% 66%;padding:22px 14px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-width:460px;margin-inline:auto;width:100%;box-shadow:inset 0 10px 0 rgba(0,0,0,.08)}
+.tooth{position:relative;aspect-ratio:3/4;border:0;border-radius:16px 16px 28px 28px;background:#fff;display:flex;flex-wrap:wrap;align-content:center;justify-content:center;gap:4px;padding:6px;touch-action:none;min-height:84px}
+.tooth i{width:18px;height:18px;border-radius:50%;background:#C9A227;display:block;transition:scale .3s,opacity .3s}
+.tooth i.t1{background:#B7791F}.tooth i.t2{background:#8A5A2B}
+.tooth i.gone{scale:0;opacity:0}
+.tooth.clean{box-shadow:0 0 0 4px var(--sun),0 0 18px var(--sun)}
+
+/* plate / lunch / market */
+.plate-wrap{display:grid;gap:14px}
+@media(min-width:700px){.plate-wrap{grid-template-columns:1fr 1fr;align-items:start}}
+.plate{display:grid;grid-template-columns:1fr 1fr;gap:8px;aspect-ratio:1;max-width:360px;width:100%;margin-inline:auto;border-radius:50%;background:#fff;border:8px solid #E8EEF7;padding:26px;box-shadow:0 8px 0 rgba(30,42,94,.1)}
+.zone{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:4px;border-radius:18px;font-weight:800;font-size:.78rem;text-align:center;min-width:0;min-height:0;overflow:hidden}
+.zone .zl{font-family:var(--font-d)}
+.zone .zi{display:flex;flex-wrap:wrap;justify-content:center;font-size:1.4rem;line-height:1.1}
+.zone.fruit{border-color:#FF8A5B}.zone.veg{border-color:#4FC667}.zone.grain{border-color:#E0A100}.zone.protein{border-color:#C0524E}.zone.dairy{border-color:#6BB4F0}
+.cup{max-width:360px;margin-inline:auto;width:100%;padding:8px}
+.shelf{background:#fff;border-radius:24px;padding:10px;box-shadow:0 5px 0 rgba(30,42,94,.07)}
+.shelf h4{font-size:1.05rem;margin:0 0 6px;padding-inline:6px;color:var(--ink2)}
+.shelf .row{display:flex;flex-wrap:wrap;gap:8px}
+.item{border:3px solid var(--line);background:#fff;border-radius:18px;min-width:72px;min-height:72px;padding:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:2.3rem;line-height:1;box-shadow:0 3px 0 var(--line)}
+.item small{font-size:.66rem;font-weight:800;color:var(--ink2);margin-top:2px}
+.item.in{background:var(--goodbg);border-color:var(--good)}
+.item.nope{animation:shake .4s;background:var(--badbg)}
+.listbar{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;align-items:center;background:#FFF3C4;border-radius:22px;padding:10px;font-weight:800}
+.listbar .li{font-size:1.8rem;background:#fff;border-radius:14px;padding:2px 10px;display:inline-flex;align-items:center;gap:4px}
+.listbar .li small{font-size:.8rem}
+.listbar .li.got{background:var(--goodbg);text-decoration:line-through}
+.lunchbox{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;background:#FFB8A8;border-radius:28px;padding:12px;border:6px solid #E77A66;max-width:420px;margin-inline:auto;width:100%}
+.slot{min-height:92px;border:3px dashed #fff;border-radius:20px;display:grid;place-items:center;font-size:2.8rem;background:rgba(255,255,255,.4)}
+.slot.full{border-style:solid;background:#fff}
+
+/* road */
+.roadwrap{background:#9DA9B8;border-radius:28px;padding:10px 0;overflow:hidden;position:relative;box-shadow:0 6px 0 rgba(30,42,94,.15)}
+.walk{height:60px;background:#D7DEE8;display:flex;align-items:center;justify-content:center;gap:14px;font-size:2.4rem;position:relative}
+.lane{height:64px;position:relative;border-top:4px dashed #fff;overflow:hidden}
+.lane:first-of-type{border-top:0}
+.zebra{position:absolute;inset-block:0;inset-inline-start:42%;width:16%;background:repeating-linear-gradient(0deg,#fff 0 12px,transparent 12px 24px);opacity:.9}
+.car{position:absolute;top:10px;font-size:2.6rem;line-height:1;animation:drive 5s linear infinite}
+.lane.l2 .car{animation-direction:reverse}
+@keyframes drive{from{inset-inline-start:-80px}to{inset-inline-start:100%}}
+.clear .car{opacity:0;transition:opacity .6s}
+.light{display:inline-flex;flex-direction:column;gap:4px;background:#222;border-radius:14px;padding:6px}
+.light b{width:26px;height:26px;border-radius:50%;background:#444}
+.light b.r.on{background:#FF3B30;box-shadow:0 0 12px #FF3B30}.light b.g.on{background:#34C759;box-shadow:0 0 12px #34C759}
+.kid{transition:transform 2.4s ease-in-out}
+.road-ctl{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.chk{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.chk span{padding:3px 12px;border-radius:99px;background:#fff;border:2px solid var(--line);font-weight:800;font-size:.9rem}
+.chk span.ok{background:var(--goodbg);border-color:var(--good)}
+
+/* maze */
+.maze{display:grid;gap:6px;max-width:520px;margin-inline:auto;width:100%}
+.cell{aspect-ratio:1;border-radius:16px;background:#fff;display:grid;place-items:center;font-size:clamp(1.6rem,8vw,2.6rem);border:3px solid var(--line);padding:0;position:relative}
+.cell.near{border-color:var(--sun);background:#FFF9E0}
+.cell.fire{background:#FFE1D6}
+.cell.exit{background:var(--goodbg);border-color:var(--good)}
+.pad{display:grid;grid-template-columns:repeat(3,64px);grid-template-rows:repeat(2,56px);gap:6px;justify-content:center}
+.pad .btn{min-height:50px;padding:0;font-size:1.4rem}
+
+/* quiz */
+.qz{display:flex;flex-direction:column;gap:14px;align-items:center;text-align:center}
+.qz .qnum{font-family:var(--font-d);font-weight:800;color:var(--ink2)}
+.qz .opts .opt .ab{width:34px;height:34px;border-radius:50%;background:var(--sky);display:grid;place-items:center;font-family:var(--font-d);flex:none}
+.result{text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center}
+.result .stars-big{display:flex;gap:6px;justify-content:center}
+.result .stars-big svg{width:64px;height:64px;animation:pop .6s both}
+.result .stars-big svg:nth-child(2){animation-delay:.2s}.result .stars-big svg:nth-child(3){animation-delay:.4s}
+.result h2{font-size:2.2rem}
+.result .acts{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+
+/* assess */
+.cmp{display:grid;gap:10px}
+.cmp .r{display:grid;grid-template-columns:110px 1fr 46px;gap:10px;align-items:center;font-weight:800}
+.cmp .r.h{color:var(--ink2);font-size:.88rem}
+.cmp .tr{height:20px;background:#E3ECF7;border-radius:99px;overflow:hidden}
+.cmp .tr i{display:block;height:100%;border-radius:99px}
+.wres{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.wres .it{display:flex;flex-direction:column;gap:8px;background:var(--wcl);border-radius:22px;padding:14px}
+.wres .it h4{font-size:1.15rem}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.tabs button{border:0;background:#fff;border-radius:999px;padding:8px 18px;font-family:var(--font-d);font-weight:800;font-size:1.1rem;box-shadow:0 3px 0 rgba(30,42,94,.1);min-height:46px}
+.tabs button.on{background:var(--ink);color:#fff}
+
+/* badges */
+.bgrid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.badge{background:#fff;border-radius:24px;padding:14px 10px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:0 5px 0 rgba(30,42,94,.07)}
+.badge .coin{width:84px;height:84px;border-radius:50%;display:grid;place-items:center;font-size:2.6rem;background:radial-gradient(circle at 30% 25%,#FFE98A,#FFC93C 60%,#E0A100);box-shadow:inset 0 -6px 0 rgba(0,0,0,.12),0 4px 0 #B07F00}
+.badge.off .coin{background:#D6DEE9;box-shadow:inset 0 -6px 0 rgba(0,0,0,.08);filter:grayscale(1);opacity:.65}
+.badge h4{font-size:1.05rem}
+.badge p{font-size:.82rem;color:var(--ink2);font-weight:700;line-height:1.3}
+.badge.new .coin{animation:pop .6s}
+
+/* hero customise */
+.cust{display:grid;gap:18px}
+@media(min-width:760px){.cust{grid-template-columns:260px 1fr;align-items:start}}
+.cust .prev{background:linear-gradient(180deg,var(--sky),#fff);border-radius:30px;padding:14px;text-align:center;box-shadow:0 6px 0 rgba(30,42,94,.08)}
+.cust .prev svg{width:100%;max-width:220px}
+.opt-row{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0 16px}
+.sw{width:54px;height:54px;border-radius:50%;border:4px solid #fff;box-shadow:0 0 0 3px var(--line),0 4px 0 rgba(0,0,0,.12);padding:0}
+.sw.on{box-shadow:0 0 0 5px var(--ink),0 4px 0 rgba(0,0,0,.12)}
+.chipb{border:3px solid var(--line);background:#fff;border-radius:999px;padding:6px 16px;font-weight:800;min-height:46px}
+.chipb.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.chipb:disabled{opacity:.45}
+.cust h3{font-size:1.25rem;margin-top:6px}
+
+/* certificate */
+.cert{background:#FFFDF3;border-radius:14px;padding:12px;box-shadow:0 10px 30px rgba(30,42,94,.2);max-width:760px;margin-inline:auto}
+.cert .frame{border:6px double #C99A12;border-radius:6px;padding:24px 16px;text-align:center;display:flex;flex-direction:column;gap:10px;align-items:center;background:radial-gradient(circle at 50% 0,#FFF6CC,#FFFDF3 55%)}
+.cert h2{font-size:clamp(1.8rem,6vw,2.8rem);color:#8A5A00}
+.cert .nick{font-family:var(--font-d);font-weight:800;font-size:clamp(2rem,8vw,3.4rem);color:var(--coral-d)}
+.cert svg.av{width:140px}
+.cert .sig{display:flex;justify-content:space-around;gap:20px;width:100%;flex-wrap:wrap;align-items:end;margin-top:6px}
+.cert .sig div{font-weight:800;color:var(--ink2);border-top:3px solid #C99A12;padding-top:4px;min-width:130px}
+.lockbox{text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px;padding:30px 16px}
+
+/* parents */
+.prose{max-width:760px}
+.prose h2{font-size:1.6rem;margin:22px 0 8px}
+.prose p,.prose li{font-weight:600;color:#2A3568}
+.prose ul{padding-inline-start:22px;display:grid;gap:6px;margin:8px 0}
+.wlist{display:grid;gap:10px}
+.wlist .w{display:flex;gap:12px;align-items:flex-start;background:var(--wcl);border-radius:20px;padding:12px}
+.wlist .w svg{width:54px;height:54px;flex:none}
+.wlist .w b{font-family:var(--font-d);font-size:1.15rem}
+
+/* toasts */
+#toasts{position:fixed;top:calc(env(safe-area-inset-top,0px) + 70px);left:0;right:0;z-index:400;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
+.toast{background:var(--ink);color:#fff;border-radius:999px;padding:10px 20px;font-weight:800;box-shadow:0 8px 20px rgba(0,0,0,.25);animation:viewin .3s both;max-width:90vw;text-align:center}
+.toast.star{background:var(--sun);color:#5A3F00}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:500;width:100%;height:100%}
+
+@media(max-width:520px){
+  .brand span{display:none}
+  .hud{gap:6px}
+  .cmp .r{grid-template-columns:84px 1fr 40px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  .cloud{display:none}
+}
+</style>
+<div class="bgfx" aria-hidden="true">
+  <div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div>
+  <div class="hills"><svg viewBox="0 0 1200 200" preserveAspectRatio="none"><path d="M0 120 Q200 40 420 110 T800 100 T1200 90 V200 H0Z" fill="#B9EBB8"/><path d="M0 160 Q260 90 520 150 T1000 140 T1200 150 V200 H0Z" fill="#8DDB8E"/></svg></div>
+</div>
+<header class="top"><div class="in" id="topbar"></div></header>
+<main class="in" id="view"></main>
+<nav class="nav" aria-label="Main"><div class="in" id="nav"></div></nav>
+<div id="stage" class="stage" hidden></div>
+<div id="toasts" aria-live="polite"></div>
+<canvas id="confetti" aria-hidden="true"></canvas>
+<script>
+'use strict';
+/* ---------- state ---------- */
+const KEY='healthHeroes.v1';
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const b=(en,ar)=>({en,ar});
+let S={lang:'en',age:null,sound:true,voice:true,best:{},quiz:{},pre:null,post:null,hero:{cape:0,acc:0,nick:0},badges:{},tab:'badges'};
+try{const raw=localStorage.getItem(KEY);if(raw)S=Object.assign(S,JSON.parse(raw));}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const L=o=>o==null?'':(typeof o==='string'?o:(o[S.lang]!=null?o[S.lang]:o.en));
+const N=n=>S.lang==='ar'?String(n).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]):String(n);
+const h=html=>{const t=document.createElement('template');t.innerHTML=html.trim();return t.content.firstElementChild};
+const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const reduceMotion=()=>window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- cleanup of timers when leaving a game ---------- */
+let cleanups=[];
+const onCleanup=fn=>cleanups.push(fn);
+const runCleanup=()=>{cleanups.forEach(f=>{try{f()}catch(e){}});cleanups=[];try{speechSynthesis.cancel()}catch(e){}};
+
+/* ---------- audio ---------- */
+let AC;
+function tone(freqs,dur=.12,type='sine',vol=.14){
+  if(!S.sound)return;
+  try{
+    AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+    const t=AC.currentTime;
+    freqs.forEach((f,i)=>{const o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.value=f;
+      g.gain.setValueAtTime(vol,t+i*dur);g.gain.exponentialRampToValueAtTime(.001,t+i*dur+dur*1.7);
+      o.connect(g);g.connect(AC.destination);o.start(t+i*dur);o.stop(t+i*dur+dur*1.9);});
+  }catch(e){}
+}
+const sfx={ok:()=>tone([523,659,784]),no:()=>tone([262,208],.14,'triangle'),tap:()=>tone([480],.05),pop:()=>tone([700,900],.05),win:()=>tone([523,659,784,1047,1319],.12)};
+function say(txt,force){
+  if(!force&&!S.voice)return;
+  try{
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(L(txt));
+    u.lang=S.lang==='ar'?'ar-SA':'en-US';u.rate=.92;u.pitch=1.1;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+/* ---------- confetti, toasts ---------- */
+function confetti(n=140){
+  if(reduceMotion())return;
+  const c=$('#confetti'),x=c.getContext('2d');
+  c.width=innerWidth;c.height=innerHeight;
+  const cols=['#FFC93C','#FF6B5E','#4FC667','#2BA8E8','#8D6BFF','#FF9A2E'];
+  const ps=Array.from({length:n},()=>({x:innerWidth/2+(Math.random()-.5)*240,y:innerHeight*.38,vx:(Math.random()-.5)*13,vy:-Math.random()*13-4,r:4+Math.random()*6,c:cols[Math.random()*cols.length|0],a:Math.random()*6,va:(Math.random()-.5)*.35}));
+  let f=0;
+  (function step(){
+    x.clearRect(0,0,c.width,c.height);
+    ps.forEach(p=>{p.vy+=.34;p.x+=p.vx;p.y+=p.vy;p.a+=p.va;x.save();x.translate(p.x,p.y);x.rotate(p.a);x.fillStyle=p.c;x.fillRect(-p.r,-p.r/2,p.r*2,p.r);x.restore()});
+    if(++f<150)requestAnimationFrame(step);else x.clearRect(0,0,c.width,c.height);
+  })();
+}
+function toast(msg,cls=''){
+  const t=h(`<div class="toast ${cls}">${L(msg)}</div>`);
+  $('#toasts').appendChild(t);setTimeout(()=>t.remove(),2800);
+}
+
+/* ---------- UI strings ---------- */
+const U={
+  appName:b('Health Heroes','أبطال الصحة'),
+  tagline:b('Play, Explore, Discover, Become a Health Hero!','العب، استكشف، اكتشف، وكن بطلاً للصحة!'),
+  welcome:b('Welcome, Young Health Hero!','أهلاً بك يا بطل الصحة الصغير!'),
+  start:b('Start Your Adventure','ابدأ مغامرتك'),
+  worldsTitle:b('Five Adventure Worlds','خمسة عوالم للمغامرة'),
+  yourProgress:b('Your progress','تقدّمك'),
+  stars:b('Health Stars','نجوم الصحة'),
+  lunaLines:[b("Hi! I'm Nurse Luna. Let's learn to stay healthy together!",'مرحباً! أنا الممرضة لونا. هيا نتعلم معاً كيف نبقى أصحّاء!'),b('Tap the worlds to start your adventure!','اضغط على العوالم لتبدأ مغامرتك!'),b('Every mission earns you Health Stars!','كل مهمة تمنحك نجوم الصحة!')],
+  botLines:[b("Beep boop! I'm Health Bot!",'بيب بوب! أنا الروبوت الصحي!'),b('I love helping heroes!','أحب مساعدة الأبطال!'),b('Wash, eat, play, stay safe!','اغسل، كُل، العب، وكن آمناً!')],
+  nHome:b('Home','الرئيسية'),nMap:b('Adventure','المغامرة'),nRewards:b('Rewards','المكافآت'),nTests:b('Tests','الاختبارات'),nParents:b('Grown-ups','للكبار'),
+  ageTitle:b('How old are you?','كم عمرك؟'),
+  ageSub:b('Pick your hero level. We never ask for your name.','اختر مستوى بطولتك. لن نسألك عن اسمك أبداً.'),
+  age1:b('Ages 5–7','من ٥ إلى ٧ سنوات'),age1t:b('Little Heroes','الأبطال الصغار'),age1d:b('Big pictures, voice help and short missions.','صور كبيرة ومساعدة صوتية ومهام قصيرة.'),
+  age2:b('Ages 8–10','من ٨ إلى ١٠ سنوات'),age2t:b('Super Heroes','الأبطال الخارقون'),age2d:b('Bigger challenges, puzzles and multi-step missions.','تحديات أكبر وألغاز ومهام متعددة الخطوات.'),
+  ageNote:b('You can change this any time from the Adventure page.','يمكنك تغيير هذا في أي وقت من صفحة المغامرة.'),
+  mapTitle:b('Choose Your Adventure','اختر مغامرتك'),
+  mapSub:b('Finish each world to unlock the next one!','أكمل كل عالم لتفتح العالم التالي!'),
+  world:b('World','العالم'),
+  lockedMsg:b('Finish the world before this one to unlock it!','أكمل العالم الذي قبل هذا العالم لتفتحه!'),
+  missions:b('Missions','المهام'),
+  worldQuiz:b('World Quiz','اختبار العالم'),
+  quizLocked:b('Finish all missions to open the quiz.','أكمل كل المهام لتفتح الاختبار.'),
+  quizPass:b('Score 2 out of 3 to finish this world.','احصل على ٢ من ٣ لتنهي هذا العالم.'),
+  play:b('Play','العب'),replay:b('Play again','العب مرة أخرى'),back:b('Back','رجوع'),
+  backWorld:b('Back to world','العودة إلى العالم'),backMap:b('Back to map','العودة إلى الخريطة'),
+  nextMission:b('Next mission','المهمة التالية'),
+  missionDone:b('Mission complete!','أنهيت المهمة!'),
+  next:b('Next','التالي'),tryAgain:b('Not quite. Try again!','ليس تماماً. حاول مرة أخرى!'),
+  great:b('Great job!','أحسنت!'),close:b('Close','إغلاق'),listen:b('Listen','استمع'),
+  pause:b('Pause','إيقاف'),resume:b('Play','تشغيل'),restart:b('Replay','إعادة'),
+  worldDone:b('World complete!','أنهيت العالم!'),
+  badgeNew:b('New badge unlocked!','حصلت على شارة جديدة!'),
+  done:b('Done','تم'),
+  starsEarned:b('stars earned','نجوم حصلت عليها'),
+  ok:b('OK','حسناً'),
+  /* assessment */
+  testsTitle:b('Quizzes and Assessment','الاختبارات والتقييم'),
+  preT:b('Starter Check','الاختبار القبلي'),preD:b('5 quick questions to see what you know now. No pressure!','٥ أسئلة سريعة لنعرف ما تعرفه الآن. بلا ضغط!'),
+  postT:b('Hero Final Check','الاختبار البعدي'),postD:b('The same kind of 5 questions to see how much you learned.','٥ أسئلة من النوع نفسه لنرى كم تعلمت.'),
+  postLocked:b('Finish all five worlds to open the Final Check.','أكمل العوالم الخمسة لتفتح الاختبار البعدي.'),
+  takeIt:b('Start','ابدأ'),retake:b('Retake','أعد المحاولة'),
+  results:b('Learning results','نتائج التعلّم'),
+  before:b('Before','قبل'),after:b('After','بعد'),
+  noResult:b('Not taken yet','لم يُجرَ بعد'),
+  growth:b('Your knowledge grew!','معرفتك زادت!'),
+  q:b('Question','السؤال'),
+  scoreOf:b('You got {a} out of {t}','حصلت على {a} من {t}'),
+  gotIt:b('Got it!','تم!'),
+  /* rewards */
+  rewardsTitle:b('Rewards and Achievements','المكافآت والإنجازات'),
+  tBadges:b('Badges','الشارات'),tHero:b('My Hero','بطلي'),tCert:b('Certificate','الشهادة'),
+  cape:b('Cape colour','لون العباءة'),acc:b('Hero gear','عدّة البطل'),nick:b('Hero name','اسم البطل'),
+  unlockAt:b('Unlocks at {n} stars','يُفتح عند {n} نجمة'),
+  certLocked:b('Finish all five worlds and the Final Check to earn your certificate!','أكمل العوالم الخمسة والاختبار البعدي لتحصل على شهادتك!'),
+  certTitle:b('Health Hero Certificate','شهادة بطل الصحة'),
+  certLine:b('is a true Health Hero! Completed all five worlds: Hygiene, Nutrition, First Aid, Safety and Emergency.','هو بطل صحة حقيقي! أنهى العوالم الخمسة: النظافة والتغذية والإسعاف الأولي والسلامة والطوارئ.'),
+  certKeep:b('Take a screenshot to keep your certificate!','التقط صورة للشاشة لتحتفظ بشهادتك!'),
+  /* parents */
+  parentsTitle:b('For Parents and Educators','للأهل والمعلمين'),
+  resetT:b('Reset progress','إعادة ضبط التقدّم'),resetAsk:b('Really erase all stars and badges on this device?','هل تريد فعلاً مسح كل النجوم والشارات على هذا الجهاز؟'),resetYes:b('Yes, erase','نعم، امسح'),resetNo:b('Keep them','احتفظ بها'),
+  voiceOn:b('Voice','الصوت المنطوق'),
+  /* shared game text */
+  yourTurn:b('Your turn!','دورك!'),
+  seeAll:b('Found everything!','وجدت كل شيء!'),
+  found:b('Found','وجدت'),
+  lookBot:b('Tap an object to explore it!','اضغط على أي شيء لتستكشفه!')
+};
+
+/* ---------- art ---------- */
+const STAR=(on=true,cls='')=>`<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6L2.5 9.4l6.6-.8z" fill="${on?'#FFC93C':'#E1E8F2'}" stroke="${on?'#E0A100':'#C5D0E0'}" stroke-width="1.5" stroke-linejoin="round"/></svg>`;
+const ICON={
+  home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>',
+  map:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.6"/></svg>',
+  star:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2 6.3 20.3l1.2-6.4L2.8 9.5l6.4-.8z"/></svg>',
+  test:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="3"/><path d="M9 9l1.6 1.6L14 7.5M9 15h6"/></svg>',
+  people:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.4 2.7-6 6-6s6 2.6 6 6"/><circle cx="17.5" cy="9" r="2.4"/><path d="M17 14c2.6.2 4.5 2.2 4.5 5"/></svg>',
+  sound:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5v5h4l5 4v-13l-5 4z"/><path d="M16.5 9a4 4 0 0 1 0 6M19 6.5a8 8 0 0 1 0 11"/></svg>',
+  mute:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5v5h4l5 4v-13l-5 4z"/><path d="M17 9.5l4 5M21 9.5l-4 5"/></svg>',
+  x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  chev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+  lock:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 10V8a5 5 0 0 1 10 0v2h1.5A1.5 1.5 0 0 1 20 11.5v8a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19.5v-8A1.5 1.5 0 0 1 5.5 10zm2 0h6V8a3 3 0 0 0-6 0z"/></svg>',
+  play:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>',
+  pause:'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4.5" width="4.2" height="15" rx="1.5"/><rect x="13.8" y="4.5" width="4.2" height="15" rx="1.5"/></svg>',
+  replay:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.6-5.9M4 4v5h5"/></svg>'
+};
+const LOGO=`<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="#2BA8E8"/><circle cx="32" cy="32" r="30" fill="none" stroke="#1B7FB8" stroke-width="3"/><path d="M32 10l19 8v15c0 13-9 19-19 23-10-4-19-10-19-23V18z" fill="#fff"/><path d="M28 21h8v8h8v8h-8v8h-8v-8h-8v-8h8z" fill="#FF6B5E"/><path d="M50 8l1.8 3.7 4.1.5-3 2.8.8 4-3.7-2-3.7 2 .8-4-3-2.8 4.1-.5z" fill="#FFC93C"/></svg>`;
+const lunaSVG=(cls='luna')=>`<svg class="${cls}" viewBox="0 0 200 270" role="img" aria-label="Nurse Luna"><ellipse cx="100" cy="262" rx="60" ry="7" fill="rgba(30,42,94,.15)"/><rect x="76" y="236" width="20" height="22" rx="9" fill="#3B2A2A"/><rect x="104" y="236" width="20" height="22" rx="9" fill="#3B2A2A"/><path d="M50 248L68 142Q100 126 132 142L150 248Z" fill="#fff" stroke="#1E2A5E" stroke-width="4" stroke-linejoin="round"/><path d="M68 142Q100 164 132 142L128 128Q100 146 72 128Z" fill="#2BC4B4" stroke="#1E2A5E" stroke-width="3" stroke-linejoin="round"/><path d="M70 152Q44 176 54 208" stroke="#F1BE98" stroke-width="16" stroke-linecap="round" fill="none"/><path d="M80 142Q74 176 100 180Q126 176 120 142" stroke="#1E2A5E" stroke-width="4" fill="none" stroke-linecap="round"/><circle cx="100" cy="184" r="8" fill="#FFC93C" stroke="#1E2A5E" stroke-width="3"/><g class="arm-wave"><path d="M132 152Q162 142 166 108" stroke="#F1BE98" stroke-width="16" stroke-linecap="round" fill="none"/><circle cx="166" cy="102" r="12" fill="#F1BE98"/></g><circle cx="100" cy="24" r="17" fill="#3B2A2A"/><circle cx="100" cy="78" r="50" fill="#3B2A2A"/><ellipse cx="100" cy="86" rx="40" ry="42" fill="#F6CBA8"/><path d="M62 70Q80 48 100 56Q122 48 138 70Q120 62 100 66Q80 62 62 70Z" fill="#3B2A2A"/><path d="M58 54Q100 16 142 54L142 64Q100 46 58 64Z" fill="#fff" stroke="#1E2A5E" stroke-width="4" stroke-linejoin="round"/><path d="M100 44c-9-8-14-1-9 5l9 7 9-7c5-6 0-13-9-5z" fill="#FF6B5E"/><ellipse class="eye-blink" cx="84" cy="90" rx="5" ry="7" fill="#1E2A5E"/><ellipse class="eye-blink" cx="116" cy="90" rx="5" ry="7" fill="#1E2A5E"/><circle cx="72" cy="104" r="7" fill="#FF8F9A" opacity=".65"/><circle cx="128" cy="104" r="7" fill="#FF8F9A" opacity=".65"/><path d="M86 106Q100 120 114 106" stroke="#1E2A5E" stroke-width="4" fill="none" stroke-linecap="round"/></svg>`;
+const botSVG=(cls='bot')=>`<svg class="${cls}" viewBox="0 0 140 170" role="img" aria-label="Health Bot"><ellipse cx="70" cy="164" rx="34" ry="5" fill="rgba(30,42,94,.15)"/><g class="bot-float"><line x1="70" y1="16" x2="70" y2="36" stroke="#1E2A5E" stroke-width="5" stroke-linecap="round"/><circle class="antenna-dot" cx="70" cy="11" r="8" fill="#FF6B5E" stroke="#1E2A5E" stroke-width="3"/><rect x="12" y="112" width="22" height="16" rx="8" fill="#7FE3D4" stroke="#1E2A5E" stroke-width="4"/><rect x="106" y="112" width="22" height="16" rx="8" fill="#7FE3D4" stroke="#1E2A5E" stroke-width="4"/><rect x="36" y="108" width="68" height="46" rx="18" fill="#3DA5FF" stroke="#1E2A5E" stroke-width="5"/><path d="M70 143c-17-11-12-23 0-16 12-7 17 5 0 16z" fill="#FF6B5E"/><rect x="24" y="34" width="92" height="72" rx="26" fill="#7FE3D4" stroke="#1E2A5E" stroke-width="5"/><rect x="36" y="46" width="68" height="46" rx="18" fill="#1E2A5E"/><ellipse class="eye-blink" cx="56" cy="66" rx="7" ry="9" fill="#7FFFE9"/><ellipse class="eye-blink" cx="84" cy="66" rx="7" ry="9" fill="#7FFFE9"/><path d="M58 80Q70 90 82 80" stroke="#7FFFE9" stroke-width="4" fill="none" stroke-linecap="round"/><circle cx="44" cy="80" r="4" fill="#FF8F9A" opacity=".8"/><circle cx="96" cy="80" r="4" fill="#FF8F9A" opacity=".8"/></g></svg>`;
+const CAPES=['#FF6B5E','#8D6BFF','#4FC667','#FF9A2E','#2BA8E8','#FF7CC0'];
+const ACCS=[{n:b('None','بدون'),at:0},{n:b('Hero mask','قناع البطل'),at:5},{n:b('Star headband','عصبة النجمة'),at:15},{n:b('Gold crown','التاج الذهبي'),at:30}];
+const NICKS=[b('Super Smile','الابتسامة الخارقة'),b('Brave Star','النجمة الشجاعة'),b('Captain Clean','القبطان نظيف'),b('Captain Care','القبطان عناية'),b('Lightning Hero','البطل البرق'),b('Rainbow Hero','بطل قوس قزح'),b('Mighty Helper','المساعد القوي'),b('Sparkle Hero','البطل اللامع')];
+const avatarSVG=(cape=0,acc=0,cls='av')=>{
+  const c=CAPES[cape]||CAPES[0];
+  const A=['','<path d="M50 56Q80 44 110 56L110 70Q80 60 50 70Z" fill="#1E2A5E"/><ellipse cx="66" cy="64" rx="7" ry="5" fill="#fff"/><ellipse cx="94" cy="64" rx="7" ry="5" fill="#fff"/>','<rect x="46" y="36" width="68" height="11" rx="5.5" fill="#FF6B5E" stroke="#1E2A5E" stroke-width="3"/><path d="M80 18l4 8 9 1-6.600 6 2 9-8.400-4.800-8.400 4.800 2-9-6.600-6 9-1z" fill="#FFC93C" stroke="#E0A100" stroke-width="2" stroke-linejoin="round"/>','<path d="M50 40L56 14L70 30L80 10L90 30L104 14L110 40Z" fill="#FFC93C" stroke="#B07F00" stroke-width="3" stroke-linejoin="round"/><circle cx="80" cy="30" r="4" fill="#FF6B5E"/>'];
+  return `<svg class="${cls}" viewBox="0 0 160 200" role="img" aria-label="Hero"><ellipse cx="80" cy="194" rx="42" ry="6" fill="rgba(30,42,94,.15)"/><path d="M42 92Q80 80 118 92L142 176Q80 198 18 176Z" fill="${c}" stroke="#1E2A5E" stroke-width="4" stroke-linejoin="round"/><rect x="62" y="160" width="14" height="28" rx="7" fill="#1E2A5E"/><rect x="84" y="160" width="14" height="28" rx="7" fill="#1E2A5E"/><rect x="52" y="94" width="56" height="70" rx="22" fill="#2BA8E8" stroke="#1E2A5E" stroke-width="4"/><path d="M80 112l5 10 11 1.500-8 7.500 2 11-10-5.500-10 5.500 2-11-8-7.500 11-1.500z" fill="#FFC93C" stroke="#E0A100" stroke-width="1.500" stroke-linejoin="round"/><circle cx="80" cy="62" r="34" fill="#F6CBA8" stroke="#1E2A5E" stroke-width="4"/><path d="M47 58Q50 28 80 28Q110 28 113 58Q96 44 80 46Q64 44 47 58Z" fill="#3B2A2A"/><circle class="eye-blink" cx="68" cy="66" r="4.500" fill="#1E2A5E"/><circle class="eye-blink" cx="92" cy="66" r="4.500" fill="#1E2A5E"/><path d="M69 78Q80 90 91 78" stroke="#1E2A5E" stroke-width="4" fill="none" stroke-linecap="round"/>${A[acc]||''}</svg>`;
+};
+const WICON={
+  hygiene:'<svg class="wic" viewBox="0 0 100 100" aria-hidden="true"><rect x="8" y="52" width="24" height="40" rx="4" fill="#176E9E"/><rect x="36" y="38" width="28" height="54" rx="4" fill="#2BA8E8"/><rect x="68" y="58" width="24" height="34" rx="4" fill="#5CC6F5"/><g fill="#fff"><rect x="14" y="60" width="6" height="6" rx="1"/><rect x="14" y="72" width="6" height="6" rx="1"/><rect x="43" y="46" width="6" height="6" rx="1"/><rect x="52" y="46" width="6" height="6" rx="1"/><rect x="43" y="60" width="6" height="6" rx="1"/><rect x="52" y="60" width="6" height="6" rx="1"/><rect x="75" y="66" width="6" height="6" rx="1"/></g><path d="M50 4C58 15 64 21 64 28a14 14 0 0 1-28 0c0-7 6-13 14-24z" fill="#fff" stroke="#176E9E" stroke-width="3"/><circle cx="74" cy="22" r="6" fill="#fff" stroke="#5CC6F5" stroke-width="2.500"/><circle cx="24" cy="34" r="4" fill="#fff" stroke="#5CC6F5" stroke-width="2"/></svg>',
+  nutrition:'<svg class="wic" viewBox="0 0 100 100" aria-hidden="true"><ellipse cx="50" cy="84" rx="44" ry="12" fill="#7ED6F5"/><ellipse cx="50" cy="80" rx="32" ry="10" fill="#F6D98A"/><path d="M52 78Q50 54 56 36" stroke="#8A5A2B" stroke-width="7" fill="none" stroke-linecap="round"/><path d="M56 36Q38 22 22 34Q42 30 56 38Z" fill="#4FC667"/><path d="M56 36Q72 18 90 28Q70 28 57 38Z" fill="#2E9A47"/><path d="M56 36Q56 14 70 8Q64 24 58 38Z" fill="#4FC667"/><circle cx="44" cy="52" r="8" fill="#FF6B5E"/><circle cx="66" cy="56" r="7" fill="#FFC93C"/></svg>',
+  firstaid:'<svg class="wic" viewBox="0 0 100 100" aria-hidden="true"><rect x="10" y="10" width="80" height="80" rx="26" fill="#fff" stroke="#C0303F" stroke-width="5"/><path d="M42 24h16v18h18v16H58v18H42V58H24V42h18z" fill="#FF5C6C"/><rect x="62" y="64" width="34" height="14" rx="7" transform="rotate(-35 79 71)" fill="#F6CBA8" stroke="#B9895F" stroke-width="2.500"/></svg>',
+  safety:'<svg class="wic" viewBox="0 0 100 100" aria-hidden="true"><circle cx="42" cy="42" r="30" fill="#E8E0FF" stroke="#5B3CC9" stroke-width="7"/><path d="M26 46l16-14 16 14v14H26z" fill="#FFC93C" stroke="#1E2A5E" stroke-width="3" stroke-linejoin="round"/><rect x="37" y="50" width="10" height="10" fill="#FF6B5E"/><path d="M64 64l26 26" stroke="#5B3CC9" stroke-width="10" stroke-linecap="round"/></svg>',
+  emergency:'<svg class="wic" viewBox="0 0 100 100" aria-hidden="true"><rect x="14" y="70" width="72" height="18" rx="6" fill="#1E2A5E"/><path d="M24 70a26 26 0 0 1 52 0z" fill="#FF9A2E" stroke="#A85200" stroke-width="4"/><rect x="44" y="36" width="12" height="26" rx="5" fill="#FFE2B8"/><path d="M50 6v12M18 20l8 8M82 20l-8 8M6 48h12M82 48h12" stroke="#FFC93C" stroke-width="5" stroke-linecap="round"/></svg>'
+};
+
+/* ---------- drag and drop (pointer drag, or tap to pick then tap target) ---------- */
+function enableDrag(root,drop){
+  let sel=null;
+  const clearSel=()=>{if(sel){sel.classList.remove('sel');sel=null}root.classList.remove('has-sel')};
+  const pick=it=>{if(sel===it){clearSel();return}clearSel();sel=it;it.classList.add('sel');root.classList.add('has-sel')};
+  root.addEventListener('pointerdown',e=>{
+    const it=e.target.closest('.drag');
+    if(!it||it.classList.contains('used')||!root.contains(it))return;
+    e.preventDefault();sfx.tap();
+    if(root.dataset.speak&&it.dataset.n)say(it.dataset.n);
+    const r=it.getBoundingClientRect(),sx=e.clientX,sy=e.clientY;let ghost=null,moved=false;
+    const move=ev=>{
+      if(!moved&&Math.hypot(ev.clientX-sx,ev.clientY-sy)>8){moved=true;ghost=it.cloneNode(true);ghost.classList.add('ghost');ghost.style.width=r.width+'px';ghost.style.height=r.height+'px';document.body.appendChild(ghost);it.classList.add('lifted')}
+      if(ghost){ghost.style.left=ev.clientX-r.width/2+'px';ghost.style.top=ev.clientY-r.height/2+'px'}
+    };
+    const up=ev=>{
+      removeEventListener('pointermove',move);removeEventListener('pointerup',up);removeEventListener('pointercancel',up);
+      if(moved){
+        ghost.remove();it.classList.remove('lifted');
+        const el=document.elementFromPoint(ev.clientX,ev.clientY),t=el&&el.closest('[data-drop]');
+        clearSel();if(t&&root.contains(t))drop(it,t);
+      }else pick(it);
+    };
+    addEventListener('pointermove',move);addEventListener('pointerup',up);addEventListener('pointercancel',up);
+  });
+  root.addEventListener('click',e=>{
+    const it=e.target.closest('.drag');
+    if(it&&e.detail===0&&!it.classList.contains('used')){pick(it);return}
+    const t=e.target.closest('[data-drop]');
+    if(t&&sel&&!e.target.closest('.drag')){const s=sel;clearSel();drop(s,t)}
+  });
+  root.addEventListener('keydown',e=>{
+    if((e.key==='Enter'||e.key===' ')&&e.target.matches('[data-drop]')&&sel){e.preventDefault();const s=sel;clearSel();drop(s,e.target)}
+  });
+}
+const flash=(el,cls)=>{el.classList.remove('good','bad');void el.offsetWidth;el.classList.add(cls);setTimeout(()=>el.classList.remove(cls),700)};
+/* ================= generic game engines ================= */
+
+/* --- scenario / branching multiple choice --- */
+function choiceGame(box,ctx,stepsIn){
+  let steps=(typeof stepsIn==='function'?stepsIn(ctx):stepsIn).filter(s=>!s.old||ctx.age==='older');
+  const ids=steps.map((s,k)=>s.id||String(k));
+  let i=0;
+  const show=()=>{
+    const s=steps[i];
+    box.innerHTML=`<div class="qcard card"><div class="art-big ${s.a||'float'}" aria-hidden="true">${s.art||''}</div><h2 class="qtext">${L(s.q)}</h2><div class="opts"></div><div class="fb" aria-live="polite"></div><div class="prog">${steps.map((_,k)=>`<i class="${k<i?'d':k===i?'c':''}"></i>`).join('')}</div></div>`;
+    const opts=$('.opts',box),fb=$('.fb',box);
+    if(ctx.age==='young')say(s.q);
+    shuffle(s.opts).forEach(o=>{
+      const bt=h(`<button class="opt">${o.e?`<span class="oe" aria-hidden="true">${o.e}</span>`:''}<span>${L(o.t)}</span></button>`);
+      bt.onclick=()=>{
+        if(o.ok){
+          sfx.ok();$$('.opt',opts).forEach(x=>x.disabled=true);bt.classList.add('right');
+          const msg=o.fb||s.good||U.great;
+          fb.className='fb good';
+          fb.innerHTML=`<span>${L(msg)}</span><button class="btn green next">${L(U.next)}</button>`;
+          if(ctx.age==='young')say(msg);
+          $('.next',fb).onclick=()=>{
+            i=o.goto?ids.indexOf(o.goto):i+1;
+            if(s.end||i>=steps.length||i<0)ctx.win();else show();
+          };
+        }else{
+          sfx.no();ctx.miss();bt.classList.add('wrong');bt.disabled=true;
+          fb.className='fb bad';fb.innerHTML=`<span>${L(o.fb||U.tryAgain)}</span>`;
+          if(ctx.age==='young')say(o.fb||U.tryAgain);
+        }
+      };
+      opts.appendChild(bt);
+    });
+  };
+  show();
+}
+
+/* --- sort things into bins --- */
+function sortGame(box,ctx,cfg){
+  let items=shuffle(cfg.items.filter(it=>!it.old||ctx.age==='older'));
+  if(ctx.age==='young'&&cfg.young)items=items.slice(0,cfg.young);
+  let left=items.length;
+  box.dataset.speak=ctx.age==='young'?'1':'';
+  box.innerHTML=`<div class="bins">${cfg.bins.map(bn=>`<div class="drop bin" data-drop="${bn.id}" tabindex="0" role="button" aria-label="${L(bn.n)}" style="--bc:${bn.c}"><div class="bin-h"><span aria-hidden="true">${bn.e}</span> ${L(bn.n)}</div><div class="bin-items"></div></div>`).join('')}</div><div class="tray">${items.map(it=>`<button class="drag" data-id="${it.id}" data-n="${L(it.n)}"><span class="de" aria-hidden="true">${it.e}</span><small>${L(it.n)}</small></button>`).join('')}</div><div class="info" aria-live="polite">${L(cfg.hint||b('Drag each picture into the right box. You can also tap a picture, then tap a box.','اسحب كل صورة إلى الصندوق الصحيح. ويمكنك أيضاً الضغط على الصورة ثم على الصندوق.'))}</div>`;
+  const info=$('.info',box);
+  enableDrag(box,(el,tg)=>{
+    const it=items.find(x=>x.id===el.dataset.id);if(!it)return;
+    const bin=cfg.bins.find(x=>x.id===tg.dataset.drop);
+    if(it.bin===tg.dataset.drop){
+      sfx.ok();flash(tg,'good');el.classList.add('used');
+      $('.bin-items',tg).appendChild(h(`<span class="chip">${it.e}</span>`));
+      info.className='info good';info.textContent=L(it.why||U.great);
+      if(ctx.age==='young')say(it.why||U.great);
+      if(--left===0)setTimeout(ctx.win,900);
+    }else{
+      sfx.no();ctx.miss();flash(tg,'bad');
+      info.className='info warn';info.textContent=L(it.tip||bin.tip||U.tryAgain);
+      if(ctx.age==='young')say(it.tip||bin.tip||U.tryAgain);
+    }
+  });
+}
+
+/* --- hidden object hunt in an SVG scene --- */
+function huntGame(box,ctx,cfg){
+  const spots=cfg.spots.filter(s=>!s.old||ctx.age==='older');
+  const targets=spots.filter(s=>s.t),total=targets.length;let found=0;
+  box.innerHTML=`<div class="counter" id="cnt"></div><svg class="scene" viewBox="${cfg.vb}" role="group" aria-label="${L(cfg.label)}">${cfg.bg}${spots.map((s,k)=>`<g data-k="${k}"><text x="${s.x}" y="${s.y}" font-size="${s.s||60}" text-anchor="middle" dominant-baseline="central">${s.e}</text><circle class="hit" cx="${s.x}" cy="${s.y}" r="${s.r||Math.max(34,(s.s||60)*.62)}" tabindex="0" role="button" aria-label="${L(s.n)}"/></g>`).join('')}</svg><div class="info" id="info">${L(cfg.hint)}</div>`;
+  const cnt=$('#cnt',box),info=$('#info',box),svg=$('svg',box);
+  const upd=()=>cnt.textContent=`${L(U.found)}: ${N(found)} / ${N(total)}`;upd();
+  const act=g=>{
+    const s=spots[+g.dataset.k];
+    if(s.t){
+      if(g.classList.contains('done'))return;
+      g.classList.add('done');found++;sfx.ok();
+      if(s.pop)$('text',g).textContent='✨';
+      else g.insertAdjacentHTML('afterbegin',`<circle class="ring" cx="${s.x}" cy="${s.y}" r="${(s.r||40)+8}"/>`);
+      info.className='info good';info.innerHTML=`${L(s.n)}: ${L(s.why)}${s.fix?` <br>→ ${L(s.fix)}`:''}`;
+      if(ctx.age==='young')say(s.why);
+      upd();
+      if(found===total)setTimeout(ctx.win,1200);
+    }else{
+      sfx.pop();info.className='info warn';info.textContent=L(s.why);
+      if(ctx.age==='older'&&cfg.decoyMiss)ctx.miss();
+    }
+  };
+  svg.addEventListener('click',e=>{const g=e.target.closest('g[data-k]');if(g)act(g)});
+  svg.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){const g=e.target.closest('g[data-k]');if(g){e.preventDefault();act(g)}}});
+}
+
+/* --- short animated video with interactive pauses --- */
+function videoGame(box,ctx,cfg){
+  const frames=cfg.frames,dur=ctx.age==='young'?5200:4200;
+  let i=0,playing=true,timer=null,asking=false;
+  box.innerHTML=`<div class="vid"><div class="vbar"><i></i></div><div class="vstage"></div><div class="vcap" aria-live="polite"></div><div class="vctl"><button class="btn ghost pp"></button><button class="btn ghost rp">${ICON.replay}<span>${L(U.restart)}</span></button></div></div>`;
+  const stage=$('.vstage',box),cap=$('.vcap',box),bar=$('.vbar i',box),pp=$('.pp',box),vid=$('.vid',box);
+  const setPP=()=>pp.innerHTML=(playing?ICON.pause:ICON.play)+`<span>${L(playing?U.pause:U.resume)}</span>`;
+  onCleanup(()=>clearTimeout(timer));
+  const frame=()=>{
+    const f=frames[i];asking=false;
+    stage.style.background=f.bg||'';
+    stage.innerHTML=f.actors.map(a=>`<div class="actor a-${a.a||'float'}" style="left:${S.lang==='ar'?100-a.x:a.x}%;top:${a.y}%;font-size:${a.s||64}px" aria-hidden="true">${a.e}</div>`).join('')+`<div class="vluna">${lunaSVG('')}</div>`;
+    cap.textContent=L(f.t);say(f.t);
+    bar.style.width=((i+1)/frames.length*100)+'%';
+    clearTimeout(timer);
+    if(playing)timer=setTimeout(advance,dur);
+  };
+  const advance=()=>{
+    const f=frames[i];
+    if(f.q&&!f.asked){f.asked=true;ask(f.q);return}
+    if(i>=frames.length-1){ctx.win();return}
+    i++;frame();
+  };
+  const ask=q=>{
+    asking=true;clearTimeout(timer);sfx.pop();
+    const box2=h(`<div class="vq"><span class="tagp">${L(U.yourTurn)}</span><h3 class="qtext">${L(q.q)}</h3><div class="opts"></div><div class="fb" aria-live="polite"></div></div>`);
+    vid.appendChild(box2);say(q.q);
+    const opts=$('.opts',box2),fb=$('.fb',box2);
+    shuffle(q.opts).forEach(o=>{
+      const bt=h(`<button class="opt">${o.e?`<span class="oe" aria-hidden="true">${o.e}</span>`:''}<span>${L(o.t)}</span></button>`);
+      bt.onclick=()=>{
+        if(o.ok){
+          sfx.ok();$$('.opt',opts).forEach(x=>x.disabled=true);bt.classList.add('right');
+          fb.className='fb good';fb.innerHTML=`<span>${L(o.fb||U.great)}</span><button class="btn green next">${L(U.next)}</button>`;say(o.fb||U.great);
+          $('.next',fb).onclick=()=>{box2.remove();asking=false;if(i>=frames.length-1)ctx.win();else{i++;frame()}};
+        }else{sfx.no();ctx.miss();bt.classList.add('wrong');bt.disabled=true;fb.className='fb bad';fb.innerHTML=`<span>${L(o.fb||U.tryAgain)}</span>`;say(o.fb||U.tryAgain)}
+      };
+      opts.appendChild(bt);
+    });
+  };
+  pp.onclick=()=>{if(asking)return;playing=!playing;setPP();if(playing)timer=setTimeout(advance,1500);else clearTimeout(timer)};
+  $('.rp',box).onclick=()=>{$$('.vq',vid).forEach(x=>x.remove());frames.forEach(f=>f.asked=false);i=0;playing=true;setPP();frame()};
+  setPP();frame();
+}
+
+/* ================= special games ================= */
+
+/* --- Hand washing simulator --- */
+function handwashGame(box,ctx){
+  const old=ctx.age==='older';
+  const order=['water','soap','scrub','rinse','dry'];
+  const labels=[b('Wet','بلّل'),b('Soap','صابون'),b('Scrub 20 s','افرك ٢٠ ثانية'),b('Rinse','اشطف'),b('Dry','جفّف')];
+  const need={0:'water',1:'soap',3:'water',4:'towel'};
+  const hints=[b('Wet your hands. Drag the water to the hands!','بلّل يديك. اسحب الماء إلى اليدين!'),b('Now add soap. Drag the soap to the hands!','الآن أضف الصابون. اسحب الصابون إلى اليدين!'),b('Rub, rub, rub! Scrub all over for 20 seconds.','افرك وافرك! افرك كل مكان لمدة ٢٠ ثانية.'),b('Rinse the soap and germs away with water.','اشطف الصابون والجراثيم بالماء.'),b('Dry your hands with a clean towel.','جفّف يديك بمنشفة نظيفة.')];
+  const tools=[{id:'water',e:'💧',n:b('Water','ماء')},{id:'soap',e:'🧼',n:b('Soap','صابون')},{id:'towel',e:'🧻',n:b('Clean towel','منشفة نظيفة')}];
+  if(old)tools.push({id:'candy',e:'🍬',n:b('Sticky candy','حلوى لزجة')},{id:'shirt',e:'👕',n:b('Dirty shirt','قميص متسخ')});
+  let step=0,scrubs=0,dist=0;
+  const germsAt=[[18,28],[72,20],[30,70],[62,66],[48,40],[84,56]];
+  box.dataset.speak=ctx.age==='young'?'1':'';
+  box.innerHTML=`<div class="steps-row">${labels.map((l,k)=>`<span data-s="${k}">${N(k+1)}. ${L(l)}</span>`).join('')}</div>
+  <div class="hands drop" data-drop="hands" tabindex="0" role="button" aria-label="${L(b('Hands','اليدان'))}"><div class="big-hands" aria-hidden="true">🙌</div>${germsAt.map(p=>`<span class="germ" style="left:${p[0]}%;top:${p[1]}%" aria-hidden="true">🦠</span>`).join('')}<div class="suds"></div></div>
+  <div class="scrubwrap" hidden><div class="counter"></div><div class="scrubbar"><i></i></div></div>
+  <div class="tray tools">${tools.map(t=>`<button class="drag" data-id="${t.id}" data-n="${L(t.n)}"><span class="de" aria-hidden="true">${t.e}</span><small>${L(t.n)}</small></button>`).join('')}</div>
+  <div class="info" aria-live="polite"></div>`;
+  const hands=$('.hands',box),suds=$('.suds',box),info=$('.info',box),sw=$('.scrubwrap',box),bar=$('.scrubbar i',box),cn=$('.counter',box),germs=$$('.germ',box);
+  const msg=(t,c='')=>{info.className='info '+c;info.textContent=L(t);if(ctx.age==='young')say(t)};
+  const refresh=()=>{
+    $$('.steps-row span',box).forEach((sp,k)=>{sp.className=k<step?'ok':(k===step&&!old?'on':'')});
+    $$('.tools .drag',box).forEach(d=>d.classList.toggle('glow',!old&&d.dataset.id===need[step]));
+    sw.hidden=step!==2;
+  };
+  const addSuds=()=>{for(let k=0;k<14;k++){const s=document.createElement('i');const z=18+Math.random()*30;s.style.cssText=`width:${z}px;height:${z}px;left:${10+Math.random()*75}%;top:${10+Math.random()*70}%;animation-delay:${-Math.random()*2}s`;suds.appendChild(s)}};
+  const scrubTick=n=>{
+    if(step!==2)return;
+    scrubs=Math.min(20,scrubs+n);bar.style.width=(scrubs/20*100)+'%';cn.textContent=`${L(b('Scrub! ','افرك! '))}${N(scrubs)} / ${N(20)}`;
+    germs.forEach((g,k)=>{if(scrubs>=(k+1)*3){g.style.opacity='0';g.style.scale='.2'}});
+    if(scrubs>=20){step=3;sfx.ok();refresh();msg(hints[3],'good')}else if(scrubs%5===0)sfx.pop();
+  };
+  hands.addEventListener('pointermove',e=>{if(step!==2||!(e.buttons||e.pointerType==='touch'))return;dist+=Math.abs(e.movementX||6)+Math.abs(e.movementY||6);if(dist>38){dist=0;scrubTick(1)}});
+  hands.addEventListener('click',e=>{if(step===2&&e.detail>0)scrubTick(2)});
+  enableDrag(box,(el,tg)=>{
+    if(tg.dataset.drop!=='hands')return;
+    const t=el.dataset.id;
+    if(step===2){msg(b('Rub your hands first! Move your finger over them.','افرك يديك أولاً! حرّك إصبعك فوقهما.'),'warn');return}
+    if(t===need[step]){
+      sfx.ok();flash(hands,'good');
+      if(step===0)hands.querySelector('.big-hands').textContent='💦';
+      if(step===1){addSuds();hands.querySelector('.big-hands').textContent='🙌'}
+      if(step===3){suds.innerHTML='';germs.forEach(g=>{g.style.opacity='0'})}
+      step++;refresh();
+      if(step===5){msg(b('Sparkling clean hands! Wash 20 seconds, every time.','يدان نظيفتان تلمعان! اغسلهما ٢٠ ثانية في كل مرة.'),'good');setTimeout(ctx.win,1300)}
+      else msg(hints[step],'good');
+    }else{
+      sfx.no();ctx.miss();flash(hands,'bad');
+      if(t==='candy')msg(b('Candy makes hands sticky and dirty!','الحلوى تجعل اليدين لزجتين ومتسختين!'),'warn');
+      else if(t==='shirt')msg(b('A dirty shirt puts germs back on your hands!','القميص المتسخ يعيد الجراثيم إلى يديك!'),'warn');
+      else msg(old?b('Not yet! Think: what comes next when washing hands?','ليس بعد! فكّر: ما الخطوة التالية في غسل اليدين؟'):hints[step],'warn');
+    }
+  });
+  refresh();msg(old?b('Wash your hands the right way. Think about the order!','اغسل يديك بالطريقة الصحيحة. فكّر في الترتيب!'):hints[0]);
+}
+
+/* --- Tooth brushing --- */
+function teethGame(box,ctx){
+  const old=ctx.age==='older',N8=8;
+  const modes=[b('Front','الأمام'),b('Back','الخلف'),b('Chewing top','سطح المضغ')];
+  let mode=0,left=N8;
+  box.innerHTML=`${old?`<div class="seg big modes" style="align-self:center">${modes.map((m,k)=>`<button data-m="${k}" class="${k===0?'on':''}">${L(m)}</button>`).join('')}</div>`:''}
+  <div class="mouth" id="mouth">${Array.from({length:N8},(_,k)=>`<button class="tooth" data-k="${k}" aria-label="${L(b('Tooth','سنّ'))} ${N(k+1)}">${[0,1,2].map(s=>`<i class="t${old?s:0}" data-s="${old?s:0}"></i>`).join('')}</button>`).join('')}</div>
+  <div class="counter" id="cnt"></div><div class="info" aria-live="polite"></div>`;
+  const info=$('.info',box),cnt=$('#cnt',box);
+  const say2=(t,c='')=>{info.className='info '+c;info.textContent=L(t)};
+  const upd=()=>cnt.textContent=`${L(b('Dirty teeth left: ','أسنان متسخة متبقية: '))}${N(left)}`;
+  upd();say2(old?b('Brush the front, back and chewing top of every tooth! Pick a side, then rub each tooth.','نظّف أمام وخلف وسطح مضغ كل سنّ! اختر الجهة ثم افرك كل سنّ.'):b('Rub each tooth until the yellow spots disappear!','افرك كل سنّ حتى تختفي البقع الصفراء!'));
+  if(ctx.age==='young')say(b('Rub each tooth until the spots disappear!','افرك كل سنّ حتى تختفي البقع!'));
+  $$('.modes button',box).forEach(bt=>bt.onclick=()=>{mode=+bt.dataset.m;$$('.modes button',box).forEach(x=>x.classList.toggle('on',x===bt));sfx.tap()});
+  const brush=th=>{
+    if(th.classList.contains('clean'))return;
+    const spot=$$('i:not(.gone)',th).find(i=>!old||+i.dataset.s===mode);
+    if(!spot){if(old){say2(b('This side is clean. Switch to another side!','هذه الجهة نظيفة. انتقل إلى جهة أخرى!'),'warn')}return}
+    spot.classList.add('gone');sfx.pop();
+    if(!$$('i:not(.gone)',th).length){th.classList.add('clean');left--;upd();sfx.ok();say2(b('Sparkle! One tooth is shiny clean.','لمعان! سنّ واحد أصبح نظيفاً تماماً.'),'good');if(left===0){say2(b('All teeth are sparkling! Brush morning and night.','كل الأسنان تلمع! نظّف أسنانك صباحاً ومساءً.'),'good');setTimeout(ctx.win,1200)}}
+  };
+  const mouth=$('#mouth',box);let down=false,last=0;
+  mouth.style.touchAction='none';
+  mouth.addEventListener('pointerdown',e=>{down=true;const t=e.target.closest('.tooth');if(t){brush(t);last=performance.now()}});
+  mouth.addEventListener('pointermove',e=>{if(!down)return;const el=document.elementFromPoint(e.clientX,e.clientY),t=el&&el.closest('.tooth');if(t&&performance.now()-last>130){brush(t);last=performance.now()}});
+  const upH=()=>{down=false};addEventListener('pointerup',upH);onCleanup(()=>removeEventListener('pointerup',upH));
+}
+
+/* --- Balanced plate --- */
+const FOODS=[
+  {id:'apple',e:'🍎',g:'fruit',n:b('Apple','تفاحة')},{id:'banana',e:'🍌',g:'fruit',n:b('Banana','موزة')},{id:'grapes',e:'🍇',g:'fruit',n:b('Grapes','عنب')},
+  {id:'carrot',e:'🥕',g:'veg',n:b('Carrot','جزرة')},{id:'broc',e:'🥦',g:'veg',n:b('Broccoli','بروكلي')},{id:'tomato',e:'🍅',g:'veg',n:b('Tomato','طماطم')},
+  {id:'bread',e:'🍞',g:'grain',n:b('Bread','خبز')},{id:'rice',e:'🍚',g:'grain',n:b('Rice','أرز')},{id:'pasta',e:'🍝',g:'grain',n:b('Pasta','معكرونة')},
+  {id:'chicken',e:'🍗',g:'protein',n:b('Chicken','دجاج')},{id:'egg',e:'🥚',g:'protein',n:b('Egg','بيضة')},{id:'fish',e:'🐟',g:'protein',n:b('Fish','سمك')},
+  {id:'milk',e:'🥛',g:'dairy',n:b('Milk','حليب')},{id:'cheese',e:'🧀',g:'dairy',n:b('Cheese','جبن')},
+  {id:'candy',e:'🍬',g:'junk',n:b('Candy','حلوى')},{id:'fries',e:'🍟',g:'junk',n:b('Fries','بطاطا مقلية')},{id:'soda',e:'🥤',g:'junk',n:b('Soda','مشروب غازي')},{id:'donut',e:'🍩',g:'junk',n:b('Donut','دونات')}
+];
+const GROUPS={fruit:b('Fruits','فواكه'),veg:b('Vegetables','خضروات'),grain:b('Grains','حبوب'),protein:b('Protein','بروتين'),dairy:b('Dairy','ألبان')};
+function plateGame(box,ctx){
+  const old=ctx.age==='older';
+  const youngIds=['apple','banana','carrot','broc','bread','rice','chicken','egg','milk','candy','fries'];
+  const items=shuffle(old?FOODS:FOODS.filter(f=>youngIds.includes(f.id)));
+  const cnt={fruit:0,veg:0,grain:0,protein:0,dairy:0};
+  box.dataset.speak=ctx.age==='young'?'1':'';
+  const zone=z=>`<div class="drop zone ${z}" data-drop="${z}" tabindex="0" role="button" aria-label="${L(GROUPS[z])}"><span class="zl">${L(GROUPS[z])}</span><span class="zi"></span></div>`;
+  box.innerHTML=`<div class="plate-wrap"><div><div class="plate">${['fruit','veg','grain','protein'].map(zone).join('')}</div><div class="cup" style="margin-top:12px">${zone('dairy').replace('class="drop zone dairy"','class="drop zone dairy" style="min-height:64px"')}</div></div><div><div class="tray">${items.map(f=>`<button class="drag" data-id="${f.id}" data-n="${L(f.n)}"><span class="de" aria-hidden="true">${f.e}</span><small>${L(f.n)}</small></button>`).join('')}</div></div></div><div class="info" aria-live="polite">${L(old?b('Fill every part of your plate. Half of it should be fruits and vegetables!','املأ كل جزء من طبقك. نصفه يجب أن يكون فواكه وخضروات!'):b('Drag each food to the right part of the plate. Sweet treats stay off the plate!','اسحب كل طعام إلى الجزء الصحيح من الطبق. الحلويات لا توضع في الطبق!'))}</div>`;
+  const info=$('.info',box);
+  const setI=(t,c)=>{info.className='info '+c;info.textContent=L(t);if(ctx.age==='young')say(t)};
+  const check=()=>{
+    const all=Object.values(cnt).every(v=>v>=1);
+    if(!all)return;
+    if(old&&cnt.fruit+cnt.veg<3){setI(b('Almost! Half your plate should be fruits and vegetables. Add more!','تقريباً! نصف طبقك يجب أن يكون فواكه وخضروات. أضف المزيد!'),'warn');return}
+    setI(b('A balanced plate! Your body will love it.','طبق متوازن! جسمك سيحبه.'),'good');setTimeout(ctx.win,1100);
+  };
+  enableDrag(box,(el,tg)=>{
+    const f=FOODS.find(x=>x.id===el.dataset.id),z=tg.dataset.drop;
+    if(f.g==='junk'){sfx.no();ctx.miss();flash(tg,'bad');setI(b(`${L(f.n)} is a "sometimes" food. Keep it off the plate!`,`${L(f.n)} طعام "أحياناً". أبعده عن الطبق!`),'warn');return}
+    if(f.g===z){
+      sfx.ok();flash(tg,'good');el.classList.add('used');cnt[z]++;
+      $('.zi',tg).appendChild(h(`<span>${f.e}</span>`));
+      setI(b(`Yes! ${L(f.n)} goes with ${L(GROUPS[z]).toLowerCase()}.`,`صحيح! ${L(f.n)} من ${L(GROUPS[z])}.`),'good');check();
+    }else{sfx.no();ctx.miss();flash(tg,'bad');setI(b(`${L(f.n)} belongs with ${L(GROUPS[f.g]).toLowerCase()}.`,`${L(f.n)} من ${L(GROUPS[f.g])}.`),'warn')}
+  });
+}
+
+/* --- Supermarket --- */
+function marketGame(box,ctx){
+  const old=ctx.age==='older';
+  const shelves=[
+    {n:b('Fruit aisle','ممر الفواكه'),it:['apple','banana','grapes']},
+    {n:b('Vegetable aisle','ممر الخضروات'),it:['carrot','broc','tomato']},
+    {n:b('Dairy and eggs','الألبان والبيض'),it:['milk','cheese','egg']},
+    {n:b('Bakery and grains','المخبز والحبوب'),it:['bread','rice','pasta']},
+    {n:b('Meat and fish','اللحوم والأسماك'),it:['chicken','fish']},
+    {n:b('Snack aisle','ممر الوجبات الخفيفة'),it:['candy','fries','soda','donut']}
+  ];
+  const list=old?[{g:'fruit'},{g:'veg'},{g:'dairy'},{g:'protein'},{g:'grain'}]:[{id:'apple'},{id:'carrot'},{id:'milk'},{id:'bread'}];
+  const got=list.map(()=>false);
+  const food=id=>FOODS.find(f=>f.id===id);
+  box.innerHTML=`<div class="listbar"><b>${L(b('Shopping list:','قائمة التسوق:'))}</b>${list.map((l,k)=>l.id?`<span class="li" data-k="${k}">${food(l.id).e}<small>${L(food(l.id).n)}</small></span>`:`<span class="li" data-k="${k}"><small>${L(b('a','')) }${L(GROUPS[l.g])}</small></span>`).join('')}<span class="li">🛒 <small id="cart">0</small></span></div>${shelves.map(sh=>`<div class="shelf"><h4>${L(sh.n)}</h4><div class="row">${sh.it.map(id=>`<button class="item" data-id="${id}"><span aria-hidden="true">${food(id).e}</span><small>${L(food(id).n)}</small></button>`).join('')}</div></div>`).join('')}<div class="info" aria-live="polite">${L(old?b('Find one food from every group on your list. Skip the snack aisle!','اعثر على طعام واحد من كل مجموعة في قائمتك. تجاوز ممر الوجبات الخفيفة!'):b('Tap the foods on your list to put them in the cart!','اضغط على الأطعمة الموجودة في قائمتك لتضعها في العربة!'))}</div>`;
+  const info=$('.info',box);let cart=0;
+  const setI=(t,c)=>{info.className='info '+c;info.textContent=L(t);if(ctx.age==='young')say(t)};
+  box.dataset.speak='';
+  $$('.item',box).forEach(bt=>bt.onclick=()=>{
+    const f=food(bt.dataset.id);
+    if(f.g==='junk'){sfx.no();ctx.miss();bt.classList.add('nope');setTimeout(()=>bt.classList.remove('nope'),500);setI(b(`${L(f.n)} is a sometimes food. It is not on the list!`,`${L(f.n)} طعام "أحياناً". ليس في القائمة!`),'warn');return}
+    const k=list.findIndex((l,idx)=>!got[idx]&&(l.id?l.id===f.id:l.g===f.g));
+    if(k<0){sfx.pop();setI(old?b('You already have that group. Find the other ones on your list.','لديك هذه المجموعة بالفعل. ابحث عن الباقي في قائمتك.'):b('That one is not on the list today.','هذا ليس في القائمة اليوم.'),'warn');return}
+    got[k]=true;cart++;sfx.ok();bt.classList.add('in');$('#cart',box).textContent=N(cart);
+    $(`.listbar .li[data-k="${k}"]`,box).classList.add('got');
+    setI(b(`${L(f.n)} is in the cart!`,`${L(f.n)} في العربة!`),'good');
+    if(got.every(Boolean)){setI(b('Your cart is full of healthy food!','عربتك مليئة بالطعام الصحي!'),'good');setTimeout(ctx.win,1000)}
+  });
+}
+
+/* --- Lunchbox --- */
+function lunchGame(box,ctx){
+  const old=ctx.age==='older';
+  const all=[
+    {id:'apple',e:'🍎',g:'fruit',n:b('Apple','تفاحة')},{id:'grapes',e:'🍇',g:'fruit',n:b('Grapes','عنب')},{id:'carrot',e:'🥕',g:'veg',n:b('Carrot sticks','أصابع جزر')},{id:'cuke',e:'🥒',g:'veg',n:b('Cucumber','خيار')},
+    {id:'sand',e:'🥪',g:'main',n:b('Sandwich','شطيرة')},{id:'cheese',e:'🧀',g:'main',n:b('Cheese','جبن')},{id:'egg',e:'🥚',g:'main',n:b('Boiled egg','بيضة مسلوقة')},
+    {id:'water',e:'💧',g:'water',n:b('Water bottle','زجاجة ماء')},
+    {id:'juice',e:'🧃',g:'treat',n:b('Juice box','علبة عصير')},{id:'cookie',e:'🍪',g:'treat',n:b('Cookie','بسكويت')},{id:'choc',e:'🍫',g:'treat',n:b('Chocolate','شوكولاتة')},{id:'chips',e:'🍟',g:'treat',n:b('Chips','رقائق بطاطا')}
+  ];
+  const items=shuffle(old?all:all.filter(x=>['apple','carrot','sand','cheese','water','juice','cookie','chips'].includes(x.id)));
+  const packed=[null,null,null,null];
+  box.dataset.speak=ctx.age==='young'?'1':'';
+  box.innerHTML=`<div class="lunchbox drop" data-drop="box" tabindex="0" role="button" aria-label="${L(b('Lunchbox','علبة الغداء'))}">${packed.map((_,k)=>`<div class="slot" data-k="${k}"></div>`).join('')}</div><div class="counter">${L(b('Pack 4 things. Tap a packed item to take it out.','عبّئ ٤ أشياء. اضغط على عنصر معبّأ لإخراجه.'))}</div><div class="tray">${items.map(f=>`<button class="drag" data-id="${f.id}" data-n="${L(f.n)}"><span class="de" aria-hidden="true">${f.e}</span><small>${L(f.n)}</small></button>`).join('')}</div><div style="text-align:center"><button class="btn green pack" disabled>${L(b('Pack it!','جاهزة!'))}</button></div><div class="info" aria-live="polite">${L(b('A healthy lunchbox has fruit or veg, something filling, and water. Keep treats small!','علبة الغداء الصحية فيها فواكه أو خضروات، وشيء يشبع، وماء. اجعل الحلويات قليلة!'))}</div>`;
+  const info=$('.info',box),pack=$('.pack',box);
+  const setI=(t,c)=>{info.className='info '+c;info.textContent=L(t);if(ctx.age==='young')say(t)};
+  const refresh=()=>{$$('.slot',box).forEach((s,k)=>{const it=packed[k];s.textContent=it?it.e:'';s.classList.toggle('full',!!it)});pack.disabled=packed.some(x=>!x)};
+  $$('.slot',box).forEach((s,k)=>s.addEventListener('click',e=>{e.stopPropagation();const it=packed[k];if(!it)return;packed[k]=null;$(`.drag[data-id="${it.id}"]`,box).classList.remove('used');sfx.pop();refresh()}));
+  enableDrag(box,(el,tg)=>{
+    const k=packed.findIndex(x=>!x);
+    if(k<0){setI(b('The lunchbox is full! Take something out first.','العلبة ممتلئة! أخرج شيئاً أولاً.'),'warn');return}
+    packed[k]=all.find(x=>x.id===el.dataset.id);el.classList.add('used');sfx.pop();refresh();
+  });
+  pack.onclick=()=>{
+    const c={fruit:0,veg:0,main:0,water:0,treat:0};packed.forEach(p=>c[p.g]++);
+    const problems=[];
+    if(c.water<1)problems.push(b('Don\'t forget water! 💧','لا تنسَ الماء! 💧'));
+    if(c.treat>1)problems.push(b('Too many sweet treats. Keep just one at most.','حلويات كثيرة. اجعلها واحدة على الأكثر.'));
+    if(old?(c.fruit<1||c.veg<1):(c.fruit+c.veg<1))problems.push(old?b('Pack one fruit AND one vegetable.','عبّئ فاكهة وخضاراً معاً.'):b('Add a fruit or a vegetable.','أضف فاكهة أو خضاراً.'));
+    if(c.main<1)problems.push(b('Add something filling: a sandwich, cheese or an egg.','أضف شيئاً يشبع: شطيرة أو جبناً أو بيضة.'));
+    if(problems.length){sfx.no();ctx.miss();setI(problems[0],'warn');return}
+    sfx.ok();setI(b('Perfect lunchbox! Fuel for a super day.','علبة غداء مثالية! طاقة ليوم رائع.'),'good');setTimeout(ctx.win,1100);
+  };
+  refresh();
+}
+
+/* --- Road crossing --- */
+function roadGame(box,ctx){
+  const old=ctx.age==='older';
+  let light='red',tick=0,crossing=false,hand=!old,looks='';
+  box.innerHTML=`<div class="chk" id="chk">${(old?[b('Hold hand','أمسك اليد'),b('Look left','انظر يساراً'),b('Look right','انظر يميناً'),b('Look left again','انظر يساراً مجدداً'),b('Green light','الضوء أخضر')]:[b('Hold hand','أمسك اليد'),b('Green light','الضوء أخضر')]).map((c,k)=>`<span data-k="${k}">${L(c)}</span>`).join('')}</div>
+  <div class="roadwrap" id="road"><div class="walk top"><div class="light" aria-label="traffic light"><b class="r on"></b><b class="g"></b></div><span aria-hidden="true">🏫</span></div>
+  <div class="lane l1"><div class="zebra"></div><span class="car" style="animation-delay:-1s" aria-hidden="true">🚗</span><span class="car" style="animation-delay:-3s" aria-hidden="true">🚌</span></div>
+  <div class="lane l2"><div class="zebra"></div><span class="car" style="animation-delay:-2s" aria-hidden="true">🚕</span><span class="car" style="animation-delay:-4s" aria-hidden="true">🚙</span></div>
+  <div class="walk bot"><span class="kid" aria-hidden="true">🧒</span><span aria-hidden="true">👩</span></div></div>
+  <div class="road-ctl">${old?`<button class="btn ghost" data-a="hand">🤝 ${L(b('Hold hand','أمسك اليد'))}</button><button class="btn ghost" data-a="L">👀 ${L(b('Look left','يسار'))}</button><button class="btn ghost" data-a="R">👀 ${L(b('Look right','يمين'))}</button>`:''}<button class="btn green big" data-a="walk">🚶 ${L(b('Walk!','امشِ!'))}</button></div>
+  <div class="info" aria-live="polite"></div>`;
+  const info=$('.info',box),road=$('#road',box),kid=$('.kid',box),rl=$('.light .r',box),gl=$('.light .g',box);
+  const setI=(t,c='')=>{info.className='info '+c;info.textContent=L(t);if(ctx.age==='young')say(t)};
+  const mark=(k)=>{const s=$(`#chk span[data-k="${k}"]`,box);if(s)s.classList.add('ok')};
+  const greenIdx=old?4:1;
+  if(!old)mark(0);
+  setI(old?b('Cross safely: hold a grown-up\'s hand, look left-right-left, and wait for the green walking light.','اعبر بأمان: أمسك يد شخص بالغ، انظر يساراً ثم يميناً ثم يساراً، وانتظر الضوء الأخضر للمشاة.'):b('Hold a grown-up\'s hand. Wait for the green light, then tap Walk!','أمسك يد شخص بالغ. انتظر الضوء الأخضر ثم اضغط امشِ!'));
+  const setLight=l=>{light=l;rl.classList.toggle('on',l==='red');gl.classList.toggle('on',l==='green');road.classList.toggle('clear',l==='green');$(`#chk span[data-k="${greenIdx}"]`,box).classList.toggle('ok',l==='green')};
+  const iv=setInterval(()=>{if(crossing)return;tick++;if(light==='red'&&tick>=5){tick=0;setLight('green');sfx.pop()}else if(light==='green'&&tick>=7){tick=0;setLight('red')}},1000);
+  onCleanup(()=>clearInterval(iv));
+  const reset=()=>{looks='';hand=!old;$$('#chk span',box).forEach((s,k)=>{if(!(k===greenIdx&&light==='green')&&!(!old&&k===0))s.classList.remove('ok')})};
+  box.addEventListener('click',e=>{
+    const bt=e.target.closest('[data-a]');if(!bt||crossing)return;const a=bt.dataset.a;
+    if(a==='hand'){hand=true;mark(0);sfx.pop();setI(b('You are holding a grown-up\'s hand. Great!','أنت تمسك يد شخص بالغ. رائع!'),'good');return}
+    if(a==='L'||a==='R'){
+      if(!hand){sfx.no();ctx.miss();setI(b('First, hold a grown-up\'s hand!','أولاً، أمسك يد شخص بالغ!'),'warn');return}
+      const want='LRL'[looks.length];
+      if(looks.length<3&&a===want){looks+=a;mark(looks.length);sfx.pop();setI(looks.length<3?b('Good looking! Keep checking.','نظرة جيدة! تابع التحقق.'):b('All clear to look! Now wait for the green light.','انتهت النظرات! الآن انتظر الضوء الأخضر.'),'good')}
+      else{sfx.no();ctx.miss();looks='';$$('#chk span',box).forEach((s,k)=>{if(k>=1&&k<=3)s.classList.remove('ok')});setI(b('Look LEFT, then RIGHT, then LEFT again. Try once more!','انظر يساراً ثم يميناً ثم يساراً مرة أخرى. حاول مرة أخرى!'),'warn')}
+      return;
+    }
+    if(a==='walk'){
+      if(old&&!hand){sfx.no();ctx.miss();setI(b('Hold a grown-up\'s hand first!','أمسك يد شخص بالغ أولاً!'),'warn');return}
+      if(old&&looks!=='LRL'){sfx.no();ctx.miss();setI(b('Look left, right, then left again first!','انظر يساراً ثم يميناً ثم يساراً أولاً!'),'warn');return}
+      if(light!=='green'){sfx.no();ctx.miss();setI(b('Red light! Cars are coming. Wait for the green walking light.','ضوء أحمر! السيارات قادمة. انتظر الضوء الأخضر للمشاة.'),'warn');return}
+      crossing=true;sfx.ok();
+      const d=$('.walk.bot',box).offsetTop-$('.walk.top',box).offsetTop;
+      kid.style.transform=`translateY(-${d}px)`;setI(b('Walking safely across with a grown-up...','نعبر بأمان مع شخص بالغ...'),'good');
+      const t=setTimeout(()=>{setI(b('You crossed safely! Always use the crossing and the green light.','عبرت بأمان! استخدم دائماً ممر المشاة والضوء الأخضر.'),'good');setTimeout(ctx.win,800)},2600);
+      onCleanup(()=>clearTimeout(t));
+    }
+  });
+}
+
+/* --- Fire escape maze (character movement) --- */
+function mazeGame(box,ctx){
+  const old=ctx.age==='older';
+  const maps={young:['ST.F.','.F..F','F...D'].map(r=>r.split('')),older:['S.F...','..FTF.','F....F','..FT.D'].map(r=>r.split(''))};
+  const map=maps[old?'older':'young'];
+  // fix young map so a path exists: S(0,0)->(1,0)->(2,... ) defined below
+  if(!old){map[0]=['S','T','F','.','.'];map[1]=['.','.','.','F','.'];map[2]=['F','F','.','.','D']}
+  let py=0,px=0,busy=false;
+  const R=map.length,C=map[0].length;
+  box.innerHTML=`<div class="maze" dir="ltr" style="grid-template-columns:repeat(${C},1fr)"></div><div class="pad" dir="ltr"><span></span><button class="btn ghost" data-d="u" aria-label="up">▲</button><span></span><button class="btn ghost" data-d="l" aria-label="left">◀</button><button class="btn ghost" data-d="d" aria-label="down">▼</button><button class="btn ghost" data-d="r" aria-label="right">▶</button></div><div class="info" aria-live="polite"></div>`;
+  const grid=$('.maze',box),info=$('.info',box);
+  const setI=(t,c='')=>{info.className='info '+c;info.textContent=L(t);if(ctx.age==='young')say(t)};
+  const draw=()=>{
+    grid.innerHTML='';
+    for(let y=0;y<R;y++)for(let x=0;x<C;x++){
+      const t=map[y][x],near=Math.abs(y-py)+Math.abs(x-px)===1;
+      const cell=h(`<button class="cell ${t==='F'?'fire':''} ${t==='D'?'exit':''} ${near?'near':''}" data-x="${x}" data-y="${y}" aria-label="${t==='F'?'fire':t==='T'?'toy':t==='D'?'exit door':'floor'}">${y===py&&x===px?'🧒':t==='F'?'🔥':t==='T'?'🧸':t==='D'?'🚪':''}</button>`);
+      grid.appendChild(cell);
+    }
+  };
+  const move=(dx,dy)=>{
+    if(busy)return;const nx=px+dx,ny=py+dy;
+    if(nx<0||ny<0||nx>=C||ny>=R)return;
+    const t=map[ny][nx];
+    if(t==='F'){sfx.no();ctx.miss();setI(b('Hot! Fire blocks the way. Find another path!','حار! النار تسد الطريق. ابحث عن طريق آخر!'),'warn');return}
+    if(t==='T'){sfx.no();ctx.miss();setI(b('Leave your toys behind! Getting out safely is what matters.','اترك ألعابك! الأهم أن تخرج بأمان.'),'warn');return}
+    px=nx;py=ny;sfx.pop();draw();
+    if(t==='D'){busy=true;sfx.ok();setI(b('You are out! Go to the meeting spot and tell a grown-up you are safe.','لقد خرجت! اذهب إلى مكان التجمع وأخبر شخصاً بالغاً أنك بخير.'),'good');setTimeout(ctx.win,1600)}
+    else setI(b('Keep going to the exit door!','تابع إلى باب الخروج!'));
+  };
+  grid.addEventListener('click',e=>{const c=e.target.closest('.cell');if(!c)return;const dx=+c.dataset.x-px,dy=+c.dataset.y-py;if(Math.abs(dx)+Math.abs(dy)===1)move(dx,dy)});
+  $('.pad',box).addEventListener('click',e=>{const d=e.target.closest('[data-d]');if(!d)return;const m={u:[0,-1],d:[0,1],l:[-1,0],r:[1,0]}[d.dataset.d];move(m[0],m[1])});
+  const key=e=>{const m={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0]}[e.key];if(m){e.preventDefault();move(m[0],m[1])}};
+  addEventListener('keydown',key);onCleanup(()=>removeEventListener('keydown',key));
+  draw();setI(b('Fire alarm! Walk to the exit door. Fire blocks the way, and toys must stay behind.','جرس الإنذار! امشِ إلى باب الخروج. النار تسد الطريق والألعاب يجب أن تبقى.'));
+}
+
+/* --- Quiz runner (world quizzes and pre/post tests) --- */
+function runQuiz(box,qs,cfg){
+  let i=0,score=0;
+  const show=()=>{
+    const q=qs[i];
+    box.innerHTML=`<div class="qz card"><div class="qnum">${L(U.q)} ${N(i+1)} / ${N(qs.length)}</div><div class="art-big" aria-hidden="true">${q.i}</div><h2 class="qtext">${L(q.q)}</h2><div class="opts"></div><div class="fb" aria-live="polite"></div><div class="prog">${qs.map((_,k)=>`<i class="${k<i?'d':k===i?'c':''}"></i>`).join('')}</div></div>`;
+    const opts=$('.opts',box),fb=$('.fb',box);
+    if(cfg.voice)say(q.q);
+    shuffle(q.o.map((t,k)=>({t,ok:k===q.a}))).forEach((o,k)=>{
+      const bt=h(`<button class="opt"><span class="ab">${'ABC'[k]}</span><span>${L(o.t)}</span></button>`);
+      bt.onclick=()=>{
+        $$('.opt',opts).forEach(x=>x.disabled=true);
+        if(o.ok)score++;
+        const nxt=()=>{i++;if(i>=qs.length)cfg.onEnd(score);else show()};
+        if(cfg.feedback){
+          bt.classList.add(o.ok?'right':'wrong');if(o.ok)sfx.ok();else sfx.no();
+          if(!o.ok){$$('.opt',opts).forEach(x=>{});}
+          fb.className='fb '+(o.ok?'good':'bad');
+          fb.innerHTML=`<span>${L(o.ok?U.great:b('Good try! ','محاولة جيدة! '))} ${L(q.ex)}</span><button class="btn ${o.ok?'green':'blue'} next">${L(U.next)}</button>`;
+          $('.next',fb).onclick=nxt;
+        }else{sfx.pop();bt.classList.add('right');fb.className='fb good';fb.innerHTML=`<span>${L(U.gotIt)}</span>`;setTimeout(nxt,550)}
+      };
+      opts.appendChild(bt);
+    });
+  };
+  show();
+}
+/* ================= scenes ================= */
+const HOUSE_BG=`<rect width="800" height="520" fill="#CDEBFF"/><rect y="480" width="800" height="40" fill="#7ED88A"/><polygon points="60,150 400,24 740,150" fill="#E5563F" stroke="#1E2A5E" stroke-width="6" stroke-linejoin="round"/><rect x="90" y="150" width="620" height="330" fill="#FFF3D6" stroke="#1E2A5E" stroke-width="6"/><rect x="96" y="156" width="298" height="153" fill="#E9E0FF"/><rect x="406" y="156" width="298" height="153" fill="#D6F4FF"/><rect x="96" y="321" width="298" height="153" fill="#FFE9C9"/><rect x="406" y="321" width="298" height="153" fill="#DDF7DF"/><line x1="400" y1="150" x2="400" y2="480" stroke="#1E2A5E" stroke-width="6"/><line x1="90" y1="315" x2="710" y2="315" stroke="#1E2A5E" stroke-width="6"/><rect x="236" y="166" width="44" height="86" rx="6" fill="#FFC93C"/><rect x="108" y="252" width="150" height="48" rx="10" fill="#8D6BFF"/><rect x="108" y="238" width="26" height="62" rx="8" fill="#6445D6"/><rect x="430" y="246" width="100" height="12" rx="3" fill="#8A5A2B"/><rect x="440" y="258" width="8" height="40" fill="#8A5A2B"/><rect x="512" y="258" width="8" height="40" fill="#8A5A2B"/><rect x="570" y="256" width="124" height="46" rx="22" fill="#fff" stroke="#1E2A5E" stroke-width="4"/><rect x="108" y="408" width="200" height="66" fill="#C98F5A" stroke="#1E2A5E" stroke-width="4"/><rect x="108" y="404" width="200" height="10" fill="#8A5A2B"/><rect x="324" y="420" width="64" height="54" rx="6" fill="#9AA6B8" stroke="#1E2A5E" stroke-width="4"/><rect x="520" y="424" width="170" height="50" rx="16" fill="#FF8FA3"/><rect x="430" y="444" width="76" height="12" rx="3" fill="#8A5A2B"/>`;
+const HOUSE_SPOTS=[
+  {e:'💊',x:480,y:226,t:1,n:b('Medicine','الدواء'),why:b('Medicine can look like candy, but it can make children very sick!','الدواء قد يشبه الحلوى لكنه قد يُمرض الأطفال كثيراً!'),fix:b('Only a grown-up gives medicine. Tell a grown-up.','الشخص البالغ وحده يعطي الدواء. أخبر شخصاً بالغاً.')},
+  {e:'🔌',x:366,y:200,t:1,n:b('Plug socket','مقبس الكهرباء'),why:b('Sockets and plugs can give a very strong electric shock!','المقابس والقوابس قد تعطي صعقة كهربائية قوية جداً!'),fix:b('Never touch or poke a socket. Tell a grown-up.','لا تلمس المقبس ولا تدخل فيه شيئاً. أخبر شخصاً بالغاً.')},
+  {e:'🕯️',x:258,y:204,t:1,n:b('Candle','الشمعة'),why:b('A flame next to curtains can start a fire!','اللهب قرب الستائر قد يشعل حريقاً!'),fix:b('Stay away and tell a grown-up.','ابتعد وأخبر شخصاً بالغاً.')},
+  {e:'🔪',x:150,y:384,t:1,n:b('Knife','السكين'),why:b('Sharp knives can cut you badly.','السكاكين الحادة قد تجرحك جرحاً شديداً.'),fix:b('Never touch knives. Ask a grown-up.','لا تلمس السكاكين. اطلب من شخص بالغ.')},
+  {e:'🍳',x:356,y:394,t:1,n:b('Hot pan','المقلاة الساخنة'),why:b('A hot pan can burn your skin.','المقلاة الساخنة قد تحرق جلدك.'),fix:b('Stay away from the stove. Ask a grown-up.','ابتعد عن الموقد. اطلب من شخص بالغ.')},
+  {e:'🧴',x:256,y:452,t:1,n:b('Cleaning spray','بخاخ التنظيف'),why:b('Cleaning liquids are poisonous if touched or tasted.','سوائل التنظيف سامة إذا لُمست أو ذُقتها.'),fix:b('Never touch it. Tell a grown-up.','لا تلمسه. أخبر شخصاً بالغاً.')},
+  {e:'💧',x:452,y:292,t:1,old:1,s:44,n:b('Wet floor','أرض مبلولة'),why:b('Wet floors are slippery and you can fall.','الأرض المبلولة زلقة وقد تسقط.'),fix:b('Tell a grown-up to wipe it. Walk slowly.','أخبر شخصاً بالغاً ليجففها. امشِ ببطء.')},
+  {e:'🚗',x:468,y:462,t:1,old:1,s:46,n:b('Toy on the floor','لعبة على الأرض'),why:b('Toys on the floor can make you trip.','الألعاب على الأرض قد تجعلك تتعثر.'),fix:b('Tidy toys into the toy box.','رتّب الألعاب في صندوقها.')},
+  {e:'🧸',x:200,y:228,s:50,n:b('Teddy','الدب'),why:b('A teddy bear is safe to hug. Keep looking!','الدب لعبة آمنة للعناق. تابع البحث!')},
+  {e:'🍎',x:216,y:382,s:46,n:b('Apple','التفاحة'),why:b('A fresh apple is a healthy snack. Keep looking!','التفاحة وجبة صحية. تابع البحث!')},
+  {e:'🪴',x:668,y:404,s:50,n:b('Plant','النبتة'),why:b('A plant is safe. Keep looking!','النبتة آمنة. تابع البحث!')},
+  {e:'📚',x:466,y:426,s:44,n:b('Books','الكتب'),why:b('Books are safe. Keep looking!','الكتب آمنة. تابع البحث!')}
+];
+const GERM_BG=`<rect width="800" height="480" fill="#E4F6FF"/><rect y="380" width="800" height="100" fill="#D9C7A3"/><rect x="30" y="320" width="740" height="26" rx="6" fill="#C98F5A" stroke="#1E2A5E" stroke-width="4"/><rect x="60" y="226" width="170" height="94" rx="10" fill="#fff" stroke="#1E2A5E" stroke-width="4"/><rect x="620" y="60" width="140" height="262" rx="10" fill="#A8723F" stroke="#1E2A5E" stroke-width="5"/><circle cx="738" cy="200" r="10" fill="#FFC93C" stroke="#1E2A5E" stroke-width="3"/><text x="140" y="190" font-size="76" text-anchor="middle" dominant-baseline="central">🚰</text><text x="240" y="298" font-size="66" text-anchor="middle" dominant-baseline="central">🎒</text><text x="330" y="298" font-size="60" text-anchor="middle" dominant-baseline="central">📱</text><text x="440" y="298" font-size="60" text-anchor="middle" dominant-baseline="central">🧸</text><text x="560" y="298" font-size="62" text-anchor="middle" dominant-baseline="central">⌨️</text><text x="650" y="420" font-size="60" text-anchor="middle" dominant-baseline="central">👟</text>`;
+const GERM_SPOTS=[
+  {e:'🦠',x:174,y:166,t:1,pop:1,s:44,r:40,n:b('Tap germ','جرثومة الصنبور'),why:b('Taps are touched by many hands, so germs gather here!','الصنابير تلمسها أيدٍ كثيرة، فتتجمع الجراثيم هنا!'),fix:b('Wash hands with soap after touching.','اغسل يديك بالصابون بعد اللمس.')},
+  {e:'🦠',x:728,y:226,t:1,pop:1,s:44,r:40,n:b('Door handle germ','جرثومة مقبض الباب'),why:b('Door handles are touched all day long.','مقابض الأبواب تُلمس طوال اليوم.'),fix:b('Wash hands before eating.','اغسل يديك قبل الأكل.')},
+  {e:'🦠',x:354,y:270,t:1,pop:1,s:42,r:38,n:b('Phone germ','جرثومة الهاتف'),why:b('Phones travel everywhere with our hands.','الهواتف تذهب مع أيدينا إلى كل مكان.'),fix:b('Wash hands after using it.','اغسل يديك بعد استخدامه.')},
+  {e:'🦠',x:466,y:270,t:1,pop:1,s:42,r:38,n:b('Toy germ','جرثومة اللعبة'),why:b('Toys get sneezed on and touched by many friends.','الألعاب يلمسها أصدقاء كثيرون وقد يعطسون عليها.'),fix:b('Wash hands after playing.','اغسل يديك بعد اللعب.')},
+  {e:'🦠',x:588,y:268,t:1,pop:1,s:42,r:38,n:b('Keyboard germ','جرثومة لوحة المفاتيح'),why:b('Many fingers press the same keys.','أصابع كثيرة تضغط المفاتيح نفسها.'),fix:b('Wash hands after using it.','اغسل يديك بعد استخدامها.')},
+  {e:'🦠',x:268,y:268,t:1,pop:1,old:1,s:42,r:38,n:b('Backpack germ','جرثومة الحقيبة'),why:b('Backpacks sit on floors and buses.','الحقائب توضع على الأرض وفي الحافلات.'),fix:b('Wash hands before eating snacks.','اغسل يديك قبل أكل الوجبات.')},
+  {e:'🦠',x:678,y:404,t:1,pop:1,old:1,s:42,r:38,n:b('Shoe germ','جرثومة الحذاء'),why:b('Shoes walk through dirt outside.','الأحذية تمشي في الأوساخ في الخارج.'),fix:b('Never touch shoes then eat. Wash hands!','لا تلمس الحذاء ثم تأكل. اغسل يديك!')},
+  {e:'🧼',x:120,y:360,s:46,old:1,r:34,n:b('Soap','الصابون'),why:b('Clean soap fights germs. No germs here, keep hunting!','الصابون النظيف يحارب الجراثيم. لا جراثيم هنا، تابع البحث!')},
+  {e:'🧻',x:380,y:412,s:46,old:1,r:34,n:b('Clean towel','المنشفة النظيفة'),why:b('A clean towel is not a germ. Keep hunting!','المنشفة النظيفة ليست جرثومة. تابع البحث!')}
+];
+
+/* ================= helpers for world data ================= */
+const op=(t,ok,fb,e,goto)=>({t,ok,fb,e,goto});
+const yes=(t,fb,e,goto)=>op(t,true,fb,e,goto);
+const no=(t,fb,e)=>op(t,false,fb,e);
+
+/* first-aid scenarios */
+const cutSteps=()=>{
+  const big=Math.random()<.4;
+  if(big)return[
+    {art:'🧒🩸🩸',q:b('Mia has a deep cut and a lot of blood! What do you do first?','ميا لديها جرح عميق وكثير من الدم! ماذا تفعل أولاً؟'),opts:[yes(b('Shout for a grown-up right away','أنادي شخصاً بالغاً فوراً'),b('Yes! A grown-up can press on the cut with a clean cloth and get medical help.','نعم! الشخص البالغ يضغط على الجرح بقطعة قماش نظيفة ويطلب مساعدة طبية.'),'📢'),no(b('Fix it alone in the bathroom','أعالجه وحدي في الحمام'),b('A big cut needs a grown-up and medical help. Never fix it alone.','الجرح الكبير يحتاج شخصاً بالغاً ومساعدة طبية. لا تعالجه وحدك.'),'🚿'),no(b('Hide it and keep playing','أخفيه وأكمل اللعب'),b('Never hide an injury. Tell a grown-up straight away.','لا تخفِ الإصابة أبداً. أخبر شخصاً بالغاً فوراً.'),'🙈')]},
+    {art:'🧑‍⚕️🤝🧒',q:b('While the grown-up helps, what should Mia do?','بينما يساعدها الشخص البالغ، ماذا تفعل ميا؟'),end:1,opts:[yes(b('Stay calm and stay with the grown-up','تبقى هادئة وبجانب الشخص البالغ'),b('Right. Slow breaths help you feel calm.','صحيح. التنفس البطيء يساعدك على الهدوء.'),'😌'),no(b('Run away','تركض بعيداً'),b('Stay close so the grown-up can help you.','ابقَ قريباً ليتمكن الشخص البالغ من مساعدتك.'),'🏃'),no(b('Scratch the cut','تحك الجرح'),b('Do not touch it. Let the grown-up take care of it.','لا تلمسه. دع الشخص البالغ يعتني به.'),'✋')]}
+  ];
+  return[
+    {art:'🧒🦵🩸',q:b('Mia scraped her knee. There is a little blood. What first?','ميا خدشت ركبتها وفيها قليل من الدم. ماذا نفعل أولاً؟'),opts:[yes(b('Tell a grown-up and rinse gently with clean water','أخبر شخصاً بالغاً وأشطفها بلطف بماء نظيف'),b('Yes! Clean water washes the dirt and germs away.','نعم! الماء النظيف يزيل الأوساخ والجراثيم.'),'🚰'),no(b('Rub dirt on it','أفرك عليها تراباً'),b('Dirt makes it worse. Use clean water.','التراب يزيد الأمر سوءاً. استخدم ماء نظيفاً.'),'🟤'),no(b('Cover it with a dirty cloth','أغطيها بقطعة قماش متسخة'),b('Dirty cloth has germs. Use clean things.','القماش المتسخ فيه جراثيم. استخدم أشياء نظيفة.'),'🧦')]},
+    {art:'🩹',q:b('What goes on next?','ماذا نضع بعد ذلك؟'),opts:[yes(b('A clean bandage','ضمادة نظيفة'),b('Right! A clean bandage keeps germs out.','صحيح! الضمادة النظيفة تمنع الجراثيم.'),'🩹'),no(b('Nothing, pick at it','لا شيء، وأنكش فيها'),b('Picking can bring germs in. Cover it.','النكش يُدخل الجراثيم. غطِّها.'),'👆'),no(b('Leave it open in the mud','أتركها مكشوفة في الطين'),b('Mud is full of germs. Keep it clean and covered.','الطين مليء بالجراثيم. أبقها نظيفة ومغطاة.'),'🟫')]},
+    {old:1,art:'🕐',q:b('When should a grown-up look at a cut right away?','متى يجب أن ينظر شخص بالغ إلى الجرح فوراً؟'),end:1,opts:[yes(b('If it is deep or the bleeding will not stop','إذا كان عميقاً أو الدم لا يتوقف'),b('Yes! Deep cuts need medical help.','نعم! الجروح العميقة تحتاج مساعدة طبية.'),'🚨'),no(b('Never','أبداً'),b('Some cuts need a doctor. Always tell a grown-up.','بعض الجروح تحتاج طبيباً. أخبر دائماً شخصاً بالغاً.'),'🙅'),no(b('Only on weekends','في عطلة نهاية الأسبوع فقط'),b('Injuries do not wait for the weekend!','الإصابات لا تنتظر نهاية الأسبوع!'),'📅')]}
+  ];
+};
+const burnSteps=()=>{
+  const big=Math.random()<.4;
+  if(big)return[
+    {art:'🍲🔥🧒',q:b('Leo spilled a hot pot on his arm. It is a big, painful burn! What now?','ليو سكب قدراً ساخناً على ذراعه. حرق كبير ومؤلم! ماذا الآن؟'),opts:[yes(b('Shout for a grown-up at once','أنادي شخصاً بالغاً فوراً'),b('Yes! Big burns need a grown-up and medical help right away.','نعم! الحروق الكبيرة تحتاج شخصاً بالغاً ومساعدة طبية فوراً.'),'📢'),no(b('Put butter on it','أضع عليه زبدة'),b('Never put butter on a burn. It traps the heat.','لا تضع الزبدة على الحرق أبداً. فهي تحبس الحرارة.'),'🧈'),no(b('Handle it alone','أتصرف وحدي'),b('A big burn is serious. Never handle it alone.','الحرق الكبير خطير. لا تتصرف وحدك.'),'🙅')]},
+    {art:'🧑‍⚕️🧊💧',q:b('The grown-up cools the burn under cool running water. What should Leo do?','الشخص البالغ يبرّد الحرق بماء جارٍ بارد. ماذا يفعل ليو؟'),end:1,opts:[yes(b('Stay with the grown-up and breathe slowly','يبقى مع الشخص البالغ ويتنفس ببطء'),b('Right! Staying calm helps.','صحيح! الهدوء يساعد.'),'😌'),no(b('Go play outside','يذهب للعب في الخارج'),b('Stay so the grown-up can look after you.','ابقَ ليعتني بك الشخص البالغ.'),'⚽'),no(b('Pop any blisters','يفقأ الفقاعات'),b('Never pop blisters. Let a doctor decide.','لا تفقأ الفقاعات أبداً. دع الطبيب يقرر.'),'🫧')]}
+  ];
+  return[
+    {art:'☕🖐️',q:b('Leo touched a hot cup. His skin is red and sore. Who do you tell?','ليو لمس كوباً ساخناً. جلده أحمر ومؤلم. من تخبر؟'),opts:[yes(b('A grown-up, straight away','شخصاً بالغاً فوراً'),b('Yes! A grown-up helps you with burns.','نعم! الشخص البالغ يساعدك في الحروق.'),'🧑‍⚕️'),no(b('Nobody','لا أحد'),b('Always tell a grown-up about a burn.','أخبر دائماً شخصاً بالغاً عن الحرق.'),'🤐'),no(b('Only my toy','لعبتي فقط'),b('Toys cannot help. Tell a grown-up!','الألعاب لا تستطيع المساعدة. أخبر شخصاً بالغاً!'),'🧸')]},
+    {art:'🚰🖐️',q:b('What cools a small burn best?','ما أفضل شيء لتبريد حرق صغير؟'),opts:[yes(b('Cool running water','ماء جارٍ بارد'),b('Yes! Cool running water takes the heat away.','نعم! الماء الجاري البارد يسحب الحرارة.'),'🚰'),no(b('Ice','الثلج'),b('Ice can hurt the skin more. Use cool water.','الثلج قد يؤذي الجلد أكثر. استخدم ماءً بارداً.'),'🧊'),no(b('Butter','الزبدة'),b('Never butter! It traps the heat.','لا زبدة أبداً! فهي تحبس الحرارة.'),'🧈')]},
+    {old:1,art:'🫧',q:b('The burn gets a blister. What should we do?','ظهرت فقاعة على الحرق. ماذا نفعل؟'),end:1,opts:[yes(b('Leave it and let a grown-up or doctor look','أتركها وأدع شخصاً بالغاً أو طبيباً يفحصها'),b('Right! Never pop a blister.','صحيح! لا تفقأ الفقاعة أبداً.'),'🧑‍⚕️'),no(b('Pop it','أفقؤها'),b('Popping blisters can let germs in.','فقء الفقاعات قد يُدخل الجراثيم.'),'📍'),no(b('Rub it hard','أفركها بقوة'),b('Rubbing hurts more. Leave it alone.','الفرك يؤلم أكثر. اتركها.'),'🧽')]}
+  ];
+};
+const noseSteps=[
+  {art:'🧒👃🩸',q:b('Sam\'s nose is bleeding. Who do you tell first?','أنف سامي ينزف. من تخبر أولاً؟'),opts:[yes(b('A grown-up','شخصاً بالغاً'),b('Yes! A grown-up can help you.','نعم! الشخص البالغ يساعدك.'),'🧑‍⚕️'),no(b('Nobody, keep it secret','لا أحد، أبقيها سراً'),b('Never keep an injury a secret.','لا تُخفِ الإصابة أبداً.'),'🤫'),no(b('A toy','لعبة'),b('Toys cannot help. Find a grown-up!','الألعاب لا تساعد. ابحث عن شخص بالغ!'),'🧸')]},
+  {art:'🪑',q:b('How should Sam sit?','كيف يجلس سامي؟'),opts:[yes(b('Sit and lean forward a little','يجلس ويميل إلى الأمام قليلاً'),b('Yes! Leaning forward keeps blood out of your throat.','نعم! الميل إلى الأمام يمنع الدم من الوصول إلى الحلق.'),'🪑'),no(b('Tilt the head back','يرجع رأسه إلى الخلف'),b('Tilting back sends blood to the throat. Lean forward.','إرجاع الرأس يرسل الدم إلى الحلق. مِل إلى الأمام.'),'🙆'),no(b('Lie flat on the floor','يستلقي على الأرض'),b('Sit up and lean forward instead.','اجلس ومِل إلى الأمام بدلاً من ذلك.'),'🛌')]},
+  {old:1,art:'🤏👃',q:b('What do the fingers do?','ماذا تفعل الأصابع؟'),opts:[yes(b('Pinch the soft part of the nose and breathe through the mouth','تضغط الجزء اللين من الأنف ويتنفس من فمه'),b('Right! Pinch and wait. A grown-up helps with the time.','صحيح! اضغط وانتظر. الشخص البالغ يساعد في تقدير الوقت.'),'🤏'),no(b('Poke a tissue deep inside','يدخل منديلاً عميقاً'),b('Never push things deep into your nose.','لا تدخل أشياء عميقاً في أنفك.'),'🧻'),no(b('Blow the nose hard','ينفخ أنفه بقوة'),b('Blowing hard can make it bleed more.','النفخ بقوة قد يزيد النزيف.'),'💨')]},
+  {old:1,art:'⏰',q:b('The nose keeps bleeding for a long time. What now?','الأنف ما زال ينزف مدة طويلة. ماذا الآن؟'),end:1,opts:[yes(b('Tell the grown-up to get medical help','أخبر الشخص البالغ ليطلب مساعدة طبية'),b('Yes! Long bleeding needs a doctor.','نعم! النزيف الطويل يحتاج طبيباً.'),'🏥'),no(b('Wait alone for hours','أنتظر وحدي ساعات'),b('Long bleeding needs medical help. Tell a grown-up.','النزيف الطويل يحتاج مساعدة طبية. أخبر شخصاً بالغاً.'),'⌛'),no(b('Ignore it','أتجاهله'),b('Do not ignore it. Tell a grown-up.','لا تتجاهله. أخبر شخصاً بالغاً.'),'🙈')]}
+];
+const identifySteps=[
+  {art:'🧒🦵🩸',q:b('Mia has a scrape on her knee. What injury is this?','ميا لديها خدش في ركبتها. ما هذه الإصابة؟'),opts:[yes(b('A cut or scrape','جرح أو خدش'),b('Yes! A cut or scrape.','نعم! جرح أو خدش.'),'🩸'),no(b('A burn','حرق'),b('A burn is from something hot. This one is a scrape.','الحرق من شيء ساخن. هذا خدش.'),'🔥'),no(b('A nosebleed','رعاف'),b('A nosebleed comes from the nose.','الرعاف يأتي من الأنف.'),'👃')]},
+  {art:'☕🖐️',q:b('Leo touched a hot cup. His skin is red and sore. What is this?','ليو لمس كوباً ساخناً. جلده أحمر ومؤلم. ما هذا؟'),opts:[yes(b('A burn','حرق'),b('Yes! Hot things cause burns.','نعم! الأشياء الساخنة تسبب الحروق.'),'🔥'),no(b('A cut','جرح'),b('A cut breaks the skin and bleeds. This is red and sore from heat.','الجرح يشق الجلد وينزف. هذا احمرار وألم من الحرارة.'),'🩸'),no(b('A nosebleed','رعاف'),b('No, this is on the hand.','لا، هذا في اليد.'),'👃')]},
+  {art:'🧒👃🩸',q:b('Sam has blood coming from his nose. What is this?','سامي يخرج الدم من أنفه. ما هذا؟'),opts:[yes(b('A nosebleed','رعاف'),b('Yes! A nosebleed.','نعم! رعاف.'),'👃'),no(b('A burn','حرق'),b('No burn here. It is a nosebleed.','لا حرق هنا. إنه رعاف.'),'🔥'),no(b('A cut on the knee','جرح في الركبة'),b('The blood is from the nose.','الدم من الأنف.'),'🦵')]},
+  {old:1,art:'🩸🩸🧒',q:b('Which one needs a grown-up RIGHT AWAY?','أيها يحتاج شخصاً بالغاً فوراً؟'),end:1,opts:[yes(b('A deep cut with lots of blood','جرح عميق وفيه دم كثير'),b('Yes! Heavy bleeding is serious. Shout for a grown-up now.','نعم! النزيف الشديد خطير. نادِ شخصاً بالغاً الآن.'),'🚨'),no(b('A tiny scratch','خدش صغير جداً'),b('Tell a grown-up, but a tiny scratch is not urgent.','أخبر شخصاً بالغاً لكن الخدش الصغير غير عاجل.'),'🩹'),no(b('A sore finger from pencil','إصبع متعب من القلم'),b('That can wait. Heavy bleeding cannot.','هذا يحتمل الانتظار. النزيف الشديد لا يحتمل.'),'✏️')]}
+];
+
+/* ================= missions and worlds ================= */
+const v=(e,x,y,s,a)=>({e,x,y,s,a});
+const WORLDS=[
+{id:'hygiene',c:'#2BA8E8',cd:'#176E9E',cl:'#D7F1FF',n:b('Hygiene City','مدينة النظافة'),d:b('Wash, brush and chase away germs!','اغسل ونظّف أسنانك وطارد الجراثيم!'),ms:[
+  {id:'wash',e:'🧼',t:b('Super Hand Wash','غسل اليدين الخارق'),i:b('Wash your hands step by step. Drag the water, soap and towel to the hands!','اغسل يديك خطوة بخطوة. اسحب الماء والصابون والمنشفة إلى اليدين!'),run:handwashGame},
+  {id:'teeth',e:'🪥',t:b('Sparkly Teeth','أسنان لامعة'),i:b('Brush every tooth until the dirty spots are gone!','نظّف كل سنّ حتى تختفي البقع المتسخة!'),run:teethGame},
+  {id:'germs',e:'🦠',t:b('Germ Hunt','صيد الجراثيم'),i:b('Find the sneaky germs hiding in the room. Tap them to pop them!','ابحث عن الجراثيم المختبئة في الغرفة. اضغط عليها لتفرقعها!'),run:(bx,c)=>huntGame(bx,c,{vb:'0 0 800 480',bg:GERM_BG,label:b('Room with hidden germs','غرفة فيها جراثيم مختبئة'),hint:b('Tap the germs 🦠 hiding on things we touch!','اضغط على الجراثيم 🦠 المختبئة على الأشياء التي نلمسها!'),spots:GERM_SPOTS,decoyMiss:true})},
+  {id:'habits',e:'🧺',t:b('Clean or Germy?','نظيف أم جراثيم؟'),i:b('Sort the habits: healthy habits or germy habits?','صنّف العادات: عادات صحية أم عادات تنشر الجراثيم؟'),run:(bx,c)=>sortGame(bx,c,{young:6,bins:[{id:'good',e:'✅',n:b('Healthy habit','عادة صحية'),c:'#4FC667',tip:b('That one is healthy! Try the other box.','هذه عادة صحية! جرّب الصندوق الآخر.')},{id:'germy',e:'🦠',n:b('Germy habit','عادة تنشر الجراثيم'),c:'#FF6B5E',tip:b('That one spreads germs! Try the other box.','هذه تنشر الجراثيم! جرّب الصندوق الآخر.')}],items:[
+    {id:'a',e:'🧼',n:b('Wash before eating','اغسل قبل الأكل'),bin:'good',why:b('Clean hands keep germs out of your mouth.','اليدان النظيفتان تبعدان الجراثيم عن فمك.')},
+    {id:'b',e:'💪',n:b('Sneeze into elbow','اعطس في المرفق'),bin:'good',why:b('The elbow catches the germs.','المرفق يحبس الجراثيم.')},
+    {id:'c',e:'🧻',n:b('Use a tissue','استخدم منديلاً'),bin:'good',why:b('Throw the tissue away, then wash hands.','ارمِ المنديل ثم اغسل يديك.')},
+    {id:'d',e:'🦷',n:b('Brush teeth twice a day','نظّف أسنانك مرتين'),bin:'good',why:b('Brushing in the morning and at night keeps teeth strong.','التنظيف صباحاً ومساءً يقوّي الأسنان.')},
+    {id:'e',e:'🚽',n:b('Wash after the toilet','اغسل بعد الحمام'),bin:'good',old:1,why:b('Always wash with soap after the toilet.','اغسل دائماً بالصابون بعد الحمام.')},
+    {id:'f',e:'🪥',n:b('Share a toothbrush','شارك فرشاة الأسنان'),bin:'germy',why:b('Never share toothbrushes. Germs travel on them!','لا تشارك فرشاة الأسنان. الجراثيم تنتقل بها!')},
+    {id:'g',e:'👅',n:b('Lick dirty fingers','لعق الأصابع المتسخة'),bin:'germy',why:b('Dirty fingers put germs in your mouth.','الأصابع المتسخة تدخل الجراثيم إلى فمك.')},
+    {id:'h',e:'🤧',n:b('Sneeze on friends','اعطس على الأصدقاء'),bin:'germy',why:b('Sneezing on friends spreads germs.','العطس على الأصدقاء ينشر الجراثيم.')},
+    {id:'i',e:'🏀',n:b('Eat after playing, no washing','كُل بعد اللعب دون غسل'),bin:'germy',old:1,why:b('Always wash hands after playing outside.','اغسل يديك دائماً بعد اللعب في الخارج.')}
+  ]})},
+  {id:'video',e:'🎬',t:b('The Sneeze Story','قصة العطسة'),i:b('Watch the story. When it pauses, help Sam choose!','شاهد القصة. وعندما تتوقف ساعد سامي على الاختيار!'),run:(bx,c)=>videoGame(bx,c,{frames:[
+    {actors:[v('🧒',55,62,84,'bounce'),v('😮',74,28,56,'pulse')],t:b('Sam feels a big sneeze coming…','سامي يشعر بعطسة كبيرة قادمة…')},
+    {actors:[v('🤧',55,60,92,'shake'),v('🦠',76,38,40,'fly'),v('🦠',84,56,34,'fly'),v('🦠',70,24,30,'fly')],t:b('Ah-choo! Tiny germs fly out everywhere!','آتشو! جراثيم صغيرة تطير في كل مكان!'),q:{q:b('What should Sam do next time?','ماذا يجب أن يفعل سامي في المرة القادمة؟'),opts:[yes(b('Sneeze into his elbow or a tissue','يعطس في مرفقه أو في منديل'),b('Yes! The elbow catches the germs.','نعم! المرفق يحبس الجراثيم.'),'💪'),no(b('Sneeze on his friend','يعطس على صديقه'),b('Oh no! That spreads germs to friends.','لا! هذا ينشر الجراثيم إلى الأصدقاء.'),'😬'),no(b('Hold his breath','يحبس أنفاسه'),b('A sneeze has to come out. Use your elbow!','العطسة لا بد أن تخرج. استخدم مرفقك!'),'😤')]}},
+    {actors:[v('💪',55,56,92,'pulse'),v('✅',78,34,52,'bounce')],t:b('Elbow sneeze! The germs stay put.','عطسة في المرفق! الجراثيم تبقى مكانها.')},
+    {actors:[v('🚰',48,58,92,'float'),v('🧼',72,44,64,'bounce'),v('🫧',60,28,44,'float')],t:b('Then wash hands with soap and water.','ثم نغسل أيدينا بالصابون والماء.'),q:{q:b('How long do we scrub with soap?','كم مدة الفرك بالصابون؟'),opts:[yes(b('About 20 seconds','نحو ٢٠ ثانية'),b('Yes! Sing a song twice to count 20 seconds.','نعم! غنِّ أغنية مرتين لتعدّ ٢٠ ثانية.'),'⏱️'),no(b('2 seconds','ثانيتان'),b('Too quick! Germs need 20 seconds of scrubbing.','سريع جداً! الجراثيم تحتاج ٢٠ ثانية من الفرك.'),'⚡'),no(b('No need to wash','لا داعي للغسل'),b('Washing is the best germ-fighter!','الغسل أفضل محارب للجراثيم!'),'🙅')]}},
+    {actors:[v('🙌',55,56,96,'pulse'),v('✨',34,30,48,'spin'),v('✨',78,34,40,'spin')],t:b('Clean hands. Healthy hero!','أيدٍ نظيفة. بطل صحي!')}
+  ]})}
+]},
+{id:'nutrition',c:'#4FC667',cd:'#1F7A35',cl:'#DCF8E1',n:b('Nutrition Island','جزيرة التغذية'),d:b('Build plates, shop smart and eat the rainbow!','ركّب الأطباق وتسوّق بذكاء وكُل ألوان قوس قزح!'),ms:[
+  {id:'plate',e:'🍽️',t:b('Build a Plate','ركّب طبقك'),i:b('Drag each food to the right part of the plate!','اسحب كل طعام إلى الجزء الصحيح من الطبق!'),run:plateGame},
+  {id:'market',e:'🛒',t:b('Super Market','السوبر ماركت'),i:b('Shop for healthy food. Put the things on your list in the cart!','تسوّق لطعام صحي. ضع ما في قائمتك داخل العربة!'),run:marketGame},
+  {id:'sort',e:'🌈',t:b('Every Day or Sometimes?','كل يوم أم أحياناً؟'),i:b('Which foods are for every day and which are just sometimes?','أي الأطعمة لكل يوم وأيها أحياناً فقط؟'),run:(bx,c)=>sortGame(bx,c,{young:7,bins:[{id:'every',e:'🌈',n:b('Every day','كل يوم'),c:'#4FC667',tip:b('That one is healthy every day! Try the other box.','هذا صحي كل يوم! جرّب الصندوق الآخر.')},{id:'some',e:'🍰',n:b('Sometimes','أحياناً'),c:'#FF9A2E',tip:b('That is a sometimes food! Try the other box.','هذا طعام أحياناً! جرّب الصندوق الآخر.')}],items:[
+    {id:'a',e:'🍎',n:b('Apple','تفاحة'),bin:'every',why:b('Fruit gives us vitamins!','الفاكهة تعطينا الفيتامينات!')},
+    {id:'b',e:'🥕',n:b('Carrot','جزرة'),bin:'every',why:b('Vegetables help you grow!','الخضروات تساعدك على النمو!')},
+    {id:'c',e:'💧',n:b('Water','ماء'),bin:'every',why:b('Water is the best drink.','الماء أفضل مشروب.')},
+    {id:'d',e:'🥛',n:b('Milk','حليب'),bin:'every',why:b('Milk helps build strong bones.','الحليب يساعد على بناء عظام قوية.')},
+    {id:'e',e:'🍞',n:b('Bread','خبز'),bin:'every',why:b('Grains give us energy.','الحبوب تعطينا الطاقة.')},
+    {id:'f',e:'🐟',n:b('Fish','سمك'),bin:'every',old:1,why:b('Fish is protein for strong muscles.','السمك بروتين للعضلات القوية.')},
+    {id:'g',e:'🥚',n:b('Egg','بيضة'),bin:'every',old:1,why:b('Eggs are full of protein.','البيض مليء بالبروتين.')},
+    {id:'h',e:'🍬',n:b('Candy','حلوى'),bin:'some',why:b('Candy is only for sometimes.','الحلوى لبعض الأحيان فقط.')},
+    {id:'i',e:'🥤',n:b('Soda','مشروب غازي'),bin:'some',why:b('Soda has lots of sugar. Sometimes only.','المشروب الغازي فيه سكر كثير. أحياناً فقط.')},
+    {id:'j',e:'🍰',n:b('Cake','كعكة'),bin:'some',why:b('Cake is a party food.','الكعكة طعام للحفلات.')},
+    {id:'k',e:'🍟',n:b('Chips','رقائق البطاطا'),bin:'some',why:b('Chips are salty and oily. Sometimes only.','الرقائق مالحة ودهنية. أحياناً فقط.')},
+    {id:'l',e:'🍩',n:b('Donut','دونات'),bin:'some',old:1,why:b('Donuts are sweet treats.','الدونات حلوى لذيذة.')},
+    {id:'m',e:'🍦',n:b('Ice cream','بوظة'),bin:'some',old:1,why:b('Ice cream is a treat for sometimes.','البوظة حلوى لبعض الأحيان.')}
+  ]})},
+  {id:'lunch',e:'🥪',t:b('Lunchbox Pro','خبير علبة الغداء'),i:b('Pack a healthy lunchbox with 4 things!','عبّئ علبة غداء صحية بأربعة أشياء!'),run:lunchGame},
+  {id:'video',e:'🎬',t:b('The Rainbow Story','قصة قوس قزح'),i:b('Watch with Nurse Luna. Answer when the video pauses!','شاهد مع الممرضة لونا. أجب عندما يتوقف الفيديو!'),run:(bx,c)=>videoGame(bx,c,{frames:[
+    {actors:[v('🍎',40,40,64,'bounce'),v('🥕',55,64,64,'float'),v('🍌',70,36,64,'bounce'),v('🥦',84,62,64,'float'),v('🍇',62,18,52,'pulse')],t:b('Colourful foods give us different vitamins. Let us eat a rainbow!','الأطعمة الملونة تعطينا فيتامينات مختلفة. هيا نأكل قوس قزح!')},
+    {actors:[v('💧',52,52,92,'float'),v('😊',76,36,60,'bounce')],t:b('Water keeps our body happy all day long.','الماء يُبقي جسمنا سعيداً طوال اليوم.'),q:{q:b('Which drink is best every day?','أي مشروب هو الأفضل كل يوم؟'),opts:[yes(b('Water','الماء'),b('Yes! Water is the best.','نعم! الماء هو الأفضل.'),'💧'),no(b('Soda','مشروب غازي'),b('Soda has too much sugar.','المشروب الغازي فيه سكر كثير.'),'🥤'),no(b('Candy juice','عصير حلوى'),b('Too sugary! Choose water.','سكر كثير! اختر الماء.'),'🧃')]}},
+    {actors:[v('🐟',40,52,70,'slide'),v('🥚',60,50,64,'bounce'),v('🍗',78,52,64,'float'),v('💪',60,22,56,'pulse')],t:b('Protein helps our muscles grow strong: fish, eggs, chicken.','البروتين يساعد عضلاتنا على النمو: سمك وبيض ودجاج.')},
+    {actors:[v('🌈',55,46,110,'grow'),v('🥗',78,64,56,'bounce')],t:b('A mix of colours gives our body everything it needs.','مزيج الألوان يعطي جسمنا كل ما يحتاجه.'),q:{q:b('What helps our body grow strong?','ما الذي يساعد جسمنا على النمو القوي؟'),opts:[yes(b('Eating many different colours','أكل ألوان كثيرة مختلفة'),b('Yes! Eat the rainbow!','نعم! كُل قوس قزح!'),'🌈'),no(b('Only sweets','الحلويات فقط'),b('Sweets are just for sometimes.','الحلويات لبعض الأحيان فقط.'),'🍭'),no(b('Only one food','طعاماً واحداً فقط'),b('Variety keeps us healthy.','التنويع يُبقينا أصحّاء.'),'1️⃣')]}},
+    {actors:[v('🥗',55,54,96,'pulse'),v('⭐',30,28,44,'spin'),v('⭐',80,30,44,'spin')],t:b('Eat the rainbow every day!','كُل قوس قزح كل يوم!')}
+  ]})}
+]},
+{id:'firstaid',c:'#FF5C6C',cd:'#C0303F',cl:'#FFE0E3',n:b('First Aid Adventure','مغامرة الإسعاف الأولي'),d:b('Learn what to do and who to tell when someone gets hurt.','تعلّم ماذا تفعل ومن تخبر عندما يتأذى أحد.'),ms:[
+  {id:'identify',e:'🔎',t:b('Injury Detective','مُحقق الإصابات'),i:b('Look at each picture. What kind of injury is it?','انظر إلى كل صورة. ما نوع الإصابة؟'),run:(bx,c)=>choiceGame(bx,c,identifySteps)},
+  {id:'cut',e:'🩹',t:b('Cut Rescue','إنقاذ الجرح'),i:b('Help Mia with her cut. Choose the safe action every time!','ساعد ميا في جرحها. اختر التصرف الآمن في كل مرة!'),run:(bx,c)=>choiceGame(bx,c,cutSteps)},
+  {id:'burn',e:'🔥',t:b('Burn Buster','مُطفئ الحروق'),i:b('Leo has a burn. What is the safe thing to do?','ليو لديه حرق. ما التصرف الآمن؟'),run:(bx,c)=>choiceGame(bx,c,burnSteps)},
+  {id:'nose',e:'👃',t:b('Nosebleed Nurse','ممرض الرعاف'),i:b('Sam has a nosebleed. Help him step by step!','سامي لديه رعاف. ساعده خطوة بخطوة!'),run:(bx,c)=>choiceGame(bx,c,noseSteps)},
+  {id:'video',e:'🎬',t:b('The First Aid Story','قصة الإسعاف الأولي'),i:b('Watch the story and answer when it pauses!','شاهد القصة وأجب عندما تتوقف!'),run:(bx,c)=>videoGame(bx,c,{frames:[
+    {actors:[v('😢',52,56,88,'shake'),v('🩹',76,46,54,'bounce')],t:b('Oops! Accidents happen. The first rule is to tell a grown-up.','أوه! الحوادث تحدث. القاعدة الأولى أن تخبر شخصاً بالغاً.'),q:{q:b('What is the first rule when you get hurt?','ما القاعدة الأولى عندما تتأذى؟'),opts:[yes(b('Tell a grown-up','أخبر شخصاً بالغاً'),b('Yes! Grown-ups can help.','نعم! الأشخاص البالغون يستطيعون المساعدة.'),'🧑‍⚕️'),no(b('Hide it','أخفيها'),b('Never hide an injury.','لا تخفِ الإصابة أبداً.'),'🙈'),no(b('Fix it alone','أعالجها وحدي'),b('Always get a grown-up to help.','احرص دائماً على مساعدة شخص بالغ.'),'🧍')]}},
+    {actors:[v('🧰',46,52,90,'pulse'),v('🩹',68,38,54,'bounce'),v('🧤',82,60,54,'float')],t:b('A first aid kit has bandages, clean wipes and gloves. Grown-ups use it with you.','حقيبة الإسعاف فيها ضمادات ومناديل نظيفة وقفازات. الأشخاص البالغون يستخدمونها معك.')},
+    {actors:[v('🫁',52,52,84,'grow'),v('😮‍💨',78,36,56,'float')],t:b('Feeling scared? Breathe in slowly… and out slowly.','تشعر بالخوف؟ خذ شهيقاً ببطء… ثم زفيراً ببطء.'),q:{q:b('Which helps you feel calm?','ما الذي يساعدك على الهدوء؟'),opts:[yes(b('Slow deep breaths','تنفس عميق وبطيء'),b('Yes! Slow breaths calm your body.','نعم! التنفس البطيء يهدّئ جسمك.'),'😮‍💨'),no(b('Screaming','الصراخ'),b('Shouting for help is good, but to feel calm, breathe slowly.','طلب النجدة جيد، لكن لتهدأ تنفس ببطء.'),'😱'),no(b('Running away','الهرب'),b('Stay with a grown-up and breathe.','ابقَ مع شخص بالغ وتنفس.'),'🏃')]}},
+    {actors:[v('🩹',44,54,76,'bounce'),v('💪',66,50,76,'pulse'),v('⭐',82,28,48,'spin')],t:b('Brave and helpful: that is a Health Hero!','شجاع ومفيد: هذا هو بطل الصحة!')}
+  ]})}
+]},
+{id:'safety',c:'#8D6BFF',cd:'#5B3CC9',cl:'#E8E0FF',n:b('Safety Detectives','محققو السلامة'),d:b('Hunt for hidden dangers at home and on the road.','ابحث عن الأخطار المخفية في البيت وعلى الطريق.'),ms:[
+  {id:'house',e:'🏠',t:b('Hazard House','بيت الأخطار'),i:b('Explore the house. Tap every dangerous thing you can find!','استكشف البيت. اضغط على كل شيء خطير تجده!'),run:(bx,c)=>huntGame(bx,c,{vb:'0 0 800 520',bg:HOUSE_BG,label:b('Cartoon house','بيت كرتوني'),hint:b('Tap anything that could hurt someone. Safe things will tell you too!','اضغط على أي شيء قد يؤذي أحداً. والأشياء الآمنة ستخبرك أيضاً!'),spots:HOUSE_SPOTS,decoyMiss:true})},
+  {id:'danger',e:'⚠️',t:b('Safe or Danger?','آمن أم خطر؟'),i:b('Sort things into safe things and danger things!','صنّف الأشياء إلى آمنة وخطرة!'),run:(bx,c)=>sortGame(bx,c,{young:7,bins:[{id:'safe',e:'✅',n:b('Safe to play with','آمن للعب'),c:'#4FC667',tip:b('That one is dangerous! Try the other box.','هذا خطر! جرّب الصندوق الآخر.')},{id:'danger',e:'⛔',n:b('Danger! Ask a grown-up','خطر! اسأل شخصاً بالغاً'),c:'#FF5C6C',tip:b('That one is safe! Try the other box.','هذا آمن! جرّب الصندوق الآخر.')}],items:[
+    {id:'a',e:'💊',n:b('Medicine','الدواء'),bin:'danger',why:b('Medicine is not candy. Only grown-ups give it.','الدواء ليس حلوى. الأشخاص البالغون فقط يعطونه.')},
+    {id:'b',e:'🔪',n:b('Knife','سكين'),bin:'danger',why:b('Knives are sharp. Never touch them.','السكاكين حادة. لا تلمسها.')},
+    {id:'c',e:'🔌',n:b('Plug socket','مقبس كهرباء'),bin:'danger',why:b('Sockets can shock you.','المقابس قد تصعقك.')},
+    {id:'d',e:'🧴',n:b('Cleaning spray','بخاخ تنظيف'),bin:'danger',why:b('Cleaning liquids are poisonous.','سوائل التنظيف سامة.')},
+    {id:'e',e:'🔥',n:b('Matches','أعواد الثقاب'),bin:'danger',old:1,why:b('Matches start fires. Only grown-ups use them.','أعواد الثقاب تشعل الحرائق. الأشخاص البالغون فقط يستخدمونها.')},
+    {id:'f',e:'🍳',n:b('Hot pan','مقلاة ساخنة'),bin:'danger',old:1,why:b('A hot pan can burn you.','المقلاة الساخنة قد تحرقك.')},
+    {id:'g',e:'🧸',n:b('Teddy bear','دبدوب'),bin:'safe',why:b('A teddy is safe to cuddle.','الدبدوب آمن للعناق.')},
+    {id:'h',e:'📚',n:b('Storybook','كتاب قصص'),bin:'safe',why:b('Books are safe and fun.','الكتب آمنة وممتعة.')},
+    {id:'i',e:'🧩',n:b('Puzzle','أحجية'),bin:'safe',why:b('Puzzles are safe to play with.','الأحاجي آمنة للعب.')},
+    {id:'j',e:'🎨',n:b('Crayons','ألوان شمعية'),bin:'safe',why:b('Crayons are safe for drawing.','الألوان الشمعية آمنة للرسم.')},
+    {id:'k',e:'🪁',n:b('Kite in an open park','طائرة ورقية في حديقة واسعة'),bin:'safe',old:1,why:b('A kite is safe in an open park, away from power lines.','الطائرة الورقية آمنة في حديقة واسعة بعيداً عن أسلاك الكهرباء.')}
+  ]})},
+  {id:'road',e:'🚸',t:b('Road Crossing','عبور الطريق'),i:b('Cross the road safely with a grown-up. Wait for the green walking light!','اعبر الطريق بأمان مع شخص بالغ. انتظر الضوء الأخضر للمشاة!'),run:roadGame},
+  {id:'what',e:'🤔',t:b('What Would You Do?','ماذا ستفعل؟'),i:b('Choose the safe thing to do in each story!','اختر التصرف الآمن في كل قصة!'),run:(bx,c)=>choiceGame(bx,c,[
+    {art:'💊🧒',q:b('You find colourful pills on the floor. They look like candy.','وجدت حبوباً ملونة على الأرض. تشبه الحلوى.'),opts:[yes(b('Do not touch. Tell a grown-up','لا ألمسها. أخبر شخصاً بالغاً'),b('Yes! Medicine is not candy.','نعم! الدواء ليس حلوى.'),'🧑‍⚕️'),no(b('Taste one','أتذوق واحدة'),b('Never taste pills you find!','لا تتذوق حبوباً تجدها أبداً!'),'👅'),no(b('Hide them','أخبئها'),b('Hiding does not make it safe. Tell a grown-up.','الإخفاء لا يجعلها آمنة. أخبر شخصاً بالغاً.'),'🙈')]},
+    {art:'⚽🛣️',q:b('Your ball rolls into the road!','كرتك تدحرجت إلى الطريق!'),opts:[yes(b('Do not chase it. Ask a grown-up','لا أركض خلفها. أطلب من شخص بالغ'),b('Yes! A ball is not worth getting hurt.','نعم! الكرة لا تستحق أن تتأذى.'),'✋'),no(b('Run after it','أركض خلفها'),b('Cars could be coming!','قد تكون هناك سيارات قادمة!'),'🏃'),no(b('Wait for a car to stop','أنتظر أن تتوقف سيارة'),b('Never count on cars stopping. Ask a grown-up.','لا تعتمد على توقف السيارات. اطلب من شخص بالغ.'),'🚗')]},
+    {art:'🔌🍴',q:b('A fork is lying near a wall socket.','هناك شوكة قرب مقبس الكهرباء.'),opts:[yes(b('Never poke anything into a socket','لا أدخل أي شيء في المقبس أبداً'),b('Right! Sockets are dangerous.','صحيح! المقابس خطيرة.'),'🚫'),no(b('Poke the fork in to see','أدخل الشوكة لأرى'),b('Electric shock! Never do that.','صعقة كهربائية! لا تفعل ذلك أبداً.'),'⚡'),no(b('Touch it with a wet hand','ألمسه بيد مبللة'),b('Water and electricity are a danger.','الماء والكهرباء خطر.'),'💧')]},
+    {old:1,art:'💨🍳',q:b('You smell smoke coming from the kitchen.','تشم رائحة دخان من المطبخ.'),end:1,opts:[yes(b('Tell a grown-up right away','أخبر شخصاً بالغاً فوراً'),b('Yes! A grown-up knows what to do.','نعم! الشخص البالغ يعرف ما يفعله.'),'📢'),no(b('Go and look by myself','أذهب لأنظر وحدي'),b('Never go toward smoke alone.','لا تذهب نحو الدخان وحدك.'),'🚶'),no(b('Pour juice on the stove','أسكب عصيراً على الموقد'),b('Only a grown-up fights fires.','الشخص البالغ وحده يتعامل مع الحرائق.'),'🧃')]}
+  ])},
+  {id:'video',e:'🎬',t:b('The Medicine Story','قصة الدواء'),i:b('Watch Nour\'s story and answer when it pauses!','شاهد قصة نور وأجب عندما تتوقف!'),run:(bx,c)=>videoGame(bx,c,{frames:[
+    {actors:[v('👧',48,58,86,'bounce'),v('💊',72,46,56,'float'),v('🔎',72,22,44,'pulse')],t:b('Nour finds a bottle of colourful pills on the floor.','نور تجد زجاجة حبوب ملونة على الأرض.')},
+    {actors:[v('🍬',40,50,56,'float'),v('💊',60,50,70,'pulse'),v('❓',80,38,56,'bounce')],t:b('They look like candy. But medicine is not candy!','تبدو مثل الحلوى. لكن الدواء ليس حلوى!'),q:{q:b('What should Nour do?','ماذا يجب أن تفعل نور؟'),opts:[yes(b('Leave it and tell a grown-up','تتركها وتخبر شخصاً بالغاً'),b('Yes! Safe and smart.','نعم! تصرف آمن وذكي.'),'🧑‍⚕️'),no(b('Taste one','تتذوق واحدة'),b('Never taste medicine you find.','لا تتذوق دواءً تجده أبداً.'),'👅'),no(b('Give it to a friend','تعطيها لصديق'),b('That could hurt your friend!','هذا قد يؤذي صديقك!'),'🤝')]}},
+    {actors:[v('🧑‍⚕️',46,54,84,'float'),v('💊',70,46,52,'bounce'),v('✅',82,26,48,'pulse')],t:b('Only a trusted grown-up gives medicine, in the right amount.','الشخص البالغ الموثوق وحده يعطي الدواء بالكمية الصحيحة.'),q:{q:b('Who gives you medicine?','من يعطيك الدواء؟'),opts:[yes(b('A trusted grown-up','شخص بالغ موثوق'),b('Yes! Only trusted grown-ups.','نعم! الأشخاص البالغون الموثوقون فقط.'),'🧑‍⚕️'),no(b('Me, by myself','أنا بنفسي'),b('Children never take medicine alone.','الأطفال لا يتناولون الدواء وحدهم.'),'🧒'),no(b('My friend','صديقي'),b('Friends cannot give medicine.','الأصدقاء لا يعطون الدواء.'),'👫')]}},
+    {actors:[v('🔍',46,52,80,'slide'),v('🏠',68,54,76,'pulse'),v('⭐',82,26,44,'spin')],t:b('Safety detectives always tell a grown-up!','محققو السلامة يخبرون دائماً شخصاً بالغاً!')}
+  ]})}
+]},
+{id:'emergency',c:'#FF9A2E',cd:'#A85200',cl:'#FFEBD2',n:b('Emergency Heroes','أبطال الطوارئ'),d:b('Know when to get help and who to ask.','اعرف متى تطلب المساعدة ومن تطلبها.'),ms:[
+  {id:'now',e:'🚨',t:b('Emergency or Not?','طارئ أم لا؟'),i:b('Which things need a grown-up right now?','أي الأشياء تحتاج شخصاً بالغاً الآن؟'),run:(bx,c)=>sortGame(bx,c,{young:7,bins:[{id:'now',e:'🚨',n:b('Get a grown-up NOW','اطلب شخصاً بالغاً الآن'),c:'#FF5C6C',tip:b('That one can wait. Try the other box.','هذا يمكن أن ينتظر. جرّب الصندوق الآخر.')},{id:'later',e:'🙂',n:b('Not an emergency','ليس طارئاً'),c:'#4FC667',tip:b('That one needs help right now! Try the other box.','هذا يحتاج مساعدة الآن! جرّب الصندوق الآخر.')}],items:[
+    {id:'a',e:'🔥',n:b('Fire or smoke','نار أو دخان'),bin:'now',why:b('Fire is an emergency. Get out and get a grown-up.','النار طارئة. اخرج واطلب شخصاً بالغاً.')},
+    {id:'b',e:'😴',n:b('Someone will not wake up','شخص لا يستيقظ'),bin:'now',why:b('Shout for a grown-up right away.','نادِ شخصاً بالغاً فوراً.')},
+    {id:'c',e:'😮',n:b('Someone is choking','شخص يختنق'),bin:'now',why:b('Get a grown-up immediately.','اطلب شخصاً بالغاً فوراً.')},
+    {id:'d',e:'👴',n:b('Grandpa fell and cannot get up','الجد وقع ولا يستطيع النهوض'),bin:'now',old:1,why:b('Get a grown-up to help right now.','اطلب شخصاً بالغاً للمساعدة الآن.')},
+    {id:'e',e:'🩸',n:b('Bleeding that will not stop','نزيف لا يتوقف'),bin:'now',why:b('Heavy bleeding needs help right now.','النزيف الشديد يحتاج مساعدة الآن.')},
+    {id:'f',e:'🦷',n:b('A wobbly tooth','سنّ متحرك'),bin:'later',why:b('A wobbly tooth is normal. Tell a grown-up later.','السنّ المتحرك أمر طبيعي. أخبر شخصاً بالغاً لاحقاً.')},
+    {id:'g',e:'🍦',n:b('Dropped ice cream','بوظة وقعت'),bin:'later',why:b('Sad, but not an emergency!','محزن، لكنه ليس طارئاً!')},
+    {id:'h',e:'🖍️',n:b('Broken crayon','لون مكسور'),bin:'later',why:b('Not an emergency.','ليس طارئاً.')},
+    {id:'i',e:'🩹',n:b('A tiny scratch','خدش صغير جداً'),bin:'later',old:1,why:b('Tell a grown-up soon, but it is not an emergency.','أخبر شخصاً بالغاً قريباً، لكنه ليس طارئاً.')},
+    {id:'j',e:'🧸',n:b('Lost my toy','أضعت لعبتي'),bin:'later',why:b('A lost toy is sad but not an emergency.','فقدان اللعبة محزن لكنه ليس طارئاً.')}
+  ]})},
+  {id:'adult',e:'🧑‍🚒',t:b('Trusted Helpers','المساعدون الموثوقون'),i:b('Who can help you? Choose a trusted adult in each story!','من يستطيع مساعدتك؟ اختر شخصاً بالغاً موثوقاً في كل قصة!'),run:(bx,c)=>choiceGame(bx,c,[
+    {art:'🏠😟',q:b('You are at home and someone is hurt. Who do you go to?','أنت في البيت وأحدهم تأذى. إلى من تذهب؟'),opts:[yes(b('A grown-up in my family','شخص بالغ من عائلتي'),b('Yes! Go to a grown-up you trust.','نعم! اذهب إلى شخص بالغ تثق به.'),'👩‍👧'),no(b('Wait alone','أنتظر وحدي'),b('Do not wait alone. Find a grown-up.','لا تنتظر وحدك. ابحث عن شخص بالغ.'),'🧍'),no(b('Hide in my room','أختبئ في غرفتي'),b('Hiding does not help. Find a grown-up.','الاختباء لا يساعد. ابحث عن شخص بالغ.'),'🚪')]},
+    {art:'🛒🧒❓',q:b('You are lost in a big shop. Who can help?','أنت تائه في متجر كبير. من يستطيع المساعدة؟'),opts:[yes(b('A worker in uniform or the cashier','عامل بزيّ رسمي أو أمين الصندوق'),b('Yes! Workers in uniform are safe helpers.','نعم! العمال بالزيّ الرسمي مساعدون آمنون.'),'🧑‍💼'),no(b('A stranger offering candy','غريب يعرض عليّ حلوى'),b('Never go with strangers, even with candy!','لا تذهب مع الغرباء أبداً حتى لو أعطوك حلوى!'),'🍬'),no(b('Walk out alone','أخرج وحدي'),b('Stay inside and ask a helper.','ابقَ في الداخل واسأل مساعداً.'),'🚶')]},
+    {art:'🏫🤕',q:b('A friend falls at school. Who do you tell?','صديق وقع في المدرسة. من تخبر؟'),opts:[yes(b('My teacher','معلمتي أو معلمي'),b('Yes! Teachers are trusted helpers.','نعم! المعلمون مساعدون موثوقون.'),'🧑‍🏫'),no(b('Nobody','لا أحد'),b('Always tell a grown-up.','أخبر دائماً شخصاً بالغاً.'),'🤐'),no(b('Another child only','طفلاً آخر فقط'),b('Children cannot do it alone. Tell a teacher.','الأطفال لا يستطيعون وحدهم. أخبر المعلم.'),'🧒')]},
+    {old:1,art:'🌳🧒❓',q:b('You are lost in a park. What do you do?','أنت تائه في حديقة. ماذا تفعل؟'),end:1,opts:[yes(b('Look for a police officer, a worker in uniform, or a parent with children','أبحث عن شرطي أو عامل بزيّ رسمي أو أم أو أب مع أطفال'),b('Yes! Those are safe people to ask.','نعم! هؤلاء أشخاص آمنون للسؤال.'),'👮'),no(b('Follow someone who calls me','أتبع من يناديني'),b('Never follow someone you do not know.','لا تتبع من لا تعرفه أبداً.'),'🚶'),no(b('Run far away','أركض بعيداً'),b('Stay near where you got lost and ask a safe helper.','ابقَ قرب المكان واسأل مساعداً آمناً.'),'🏃')]}
+  ])},
+  {id:'tell',e:'🗣️',t:b('Tell the Helper','أخبر المساعد'),i:b('Practice telling a helper what happened, with a grown-up beside you!','تدرّب على إخبار المساعد بما حدث، مع شخص بالغ بجانبك!'),run:(bx,c)=>choiceGame(bx,c,[
+    {art:'👵🤕',q:b('Grandma slipped on the stairs and cannot get up. A grown-up is calling for help. The helper asks: "What happened?"','الجدة انزلقت على الدرج ولا تستطيع النهوض. شخص بالغ يطلب المساعدة. المساعد يسأل: "ماذا حدث؟"'),opts:[yes(b('Grandma fell and cannot get up','جدتي وقعت ولا تستطيع النهوض'),b('Clear and helpful!','واضح ومفيد!'),'🗣️'),no(b('Nothing happened','لم يحدث شيء'),b('Tell the truth so the helper can help.','قل الحقيقة ليستطيع المساعد أن يساعد.'),'🤷'),no(b('I am hungry','أنا جائع'),b('Tell what happened to Grandma.','قل ماذا حدث لجدتك.'),'🍽️')]},
+    {art:'📍🏠',q:b('The helper asks: "Where are you?"','المساعد يسأل: "أين أنتم؟"'),opts:[yes(b('At home, by the stairs. My grown-up will tell the address','في البيت قرب الدرج. الشخص البالغ سيقول العنوان'),b('Great! Where you are matters.','رائع! المكان مهم.'),'🏠'),no(b('I will not say','لن أقول'),b('The helper needs to know where to come.','المساعد يحتاج أن يعرف أين يأتي.'),'🤐'),no(b('On the moon','على القمر'),b('Give the true place so help can come.','قل المكان الحقيقي ليصل المساعدون.'),'🌙')]},
+    {art:'👂',q:b('What do you do while help is coming?','ماذا تفعل بينما المساعدة في الطريق؟'),opts:[yes(b('Stay with the grown-up and listen to the helper','أبقى مع الشخص البالغ وأستمع للمساعد'),b('Perfect! Staying calm helps everyone.','ممتاز! الهدوء يساعد الجميع.'),'🤝'),no(b('Hang up and play','أغلق وألعب'),b('Stay and listen to the helper.','ابقَ واستمع للمساعد.'),'🎮'),no(b('Run outside alone','أركض إلى الخارج وحدي'),b('Stay safe with your grown-up.','ابقَ آمناً مع الشخص البالغ.'),'🏃')]},
+    {old:1,art:'🧑‍🤝‍🧑',q:b('Who should be beside you when you talk to an emergency helper?','من يجب أن يكون بجانبك عندما تتحدث مع مساعد الطوارئ؟'),end:1,opts:[yes(b('A grown-up','شخص بالغ'),b('Yes! Always get a grown-up first.','نعم! احصل دائماً على شخص بالغ أولاً.'),'🧑‍🧑‍🧒'),no(b('Nobody, I can do it alone','لا أحد، أستطيع وحدي'),b('Serious emergencies need a grown-up.','الطوارئ الخطيرة تحتاج شخصاً بالغاً.'),'🧍'),no(b('A toy','لعبة'),b('Toys cannot help. Find a grown-up.','الألعاب لا تساعد. ابحث عن شخص بالغ.'),'🧸')]}
+  ])},
+  {id:'fire',e:'🧯',t:b('Fire Escape','الهروب من الحريق'),i:b('The alarm rings! Move to the exit door. Fire blocks the way and toys stay behind!','جرس الإنذار! تحرك إلى باب الخروج. النار تسد الطريق والألعاب تبقى!'),run:mazeGame},
+  {id:'video',e:'🎬',t:b('The Fire Alarm Story','قصة جرس الإنذار'),i:b('Watch what happens at school. Answer when it pauses!','شاهد ما يحدث في المدرسة. أجب عندما تتوقف!'),run:(bx,c)=>videoGame(bx,c,{frames:[
+    {actors:[v('🔔',52,48,90,'shake'),v('🚨',76,34,62,'pulse')],t:b('The fire alarm rings at school!','جرس إنذار الحريق يرنّ في المدرسة!')},
+    {actors:[v('👩‍🏫',44,52,84,'float'),v('🧒',62,56,72,'slide'),v('🧒',78,56,72,'slide')],t:b('Stay calm. Line up and walk out with your teacher.','ابقَ هادئاً. قف في الصف وامشِ مع معلمك إلى الخارج.'),q:{q:b('What do we do when the alarm rings?','ماذا نفعل عندما يرنّ الإنذار؟'),opts:[yes(b('Walk out calmly with the teacher','نمشي بهدوء مع المعلم'),b('Yes! Calm and together.','نعم! بهدوء ومعاً.'),'🚶'),no(b('Hide under the desk','نختبئ تحت المكتب'),b('Never hide. Go out with your teacher.','لا تختبئ. اخرج مع معلمك.'),'🙈'),no(b('Finish the game','نكمل اللعبة'),b('Stop right away and go.','توقف فوراً واذهب.'),'🎮')]}},
+    {actors:[v('🧸',46,54,70,'float'),v('🚫',46,54,100,'pulse'),v('🎒',70,54,70,'float')],t:b('Leave toys and bags behind. Never go back inside.','اترك الألعاب والحقائب. لا تعد إلى الداخل أبداً.'),q:{q:b('Your toy is still inside. Do you go back for it?','لعبتك ما زالت في الداخل. هل تعود لتأخذها؟'),opts:[yes(b('No! Stay with the teacher','لا! أبقى مع المعلم'),b('Yes! You are more important than a toy.','نعم! أنت أهم من اللعبة.'),'🙅'),no(b('Yes, quickly','نعم، بسرعة'),b('Never go back in. It is dangerous!','لا تعد إلى الداخل أبداً. هذا خطر!'),'🏃'),no(b('Run away alone','أركض وحدي بعيداً'),b('Stay with your class.','ابقَ مع صفك.'),'🚶')]}},
+    {actors:[v('🌳',46,50,96,'float'),v('🧒',66,58,66,'bounce'),v('🧒',80,58,66,'bounce'),v('👩‍🏫',56,28,60,'pulse')],t:b('At the safe spot, tell your teacher you are here.','في مكان التجمع الآمن، أخبر معلمك أنك هنا.')}
+  ]})}
+]}
+];
+
+/* ================= quizzes ================= */
+const qz=(i,q,o,a,ex)=>({i,q,o,a,ex});
+const QUIZ={
+  hygiene:[
+    qz('🧼',b('How long should you scrub your hands with soap?','كم مدة فرك يديك بالصابون؟'),[b('5 seconds','٥ ثوانٍ'),b('20 seconds','٢٠ ثانية'),b('One hour','ساعة كاملة')],1,b('Scrub for about 20 seconds.','افرك لمدة ٢٠ ثانية تقريباً.')),
+    qz('🤧',b('You need to sneeze. What is best?','تريد أن تعطس. ما الأفضل؟'),[b('Sneeze into my elbow or a tissue','أعطس في مرفقي أو في منديل'),b('Sneeze on my friend','أعطس على صديقي'),b('Hold it in forever','أحبسها للأبد')],0,b('The elbow or a tissue catches the germs.','المرفق أو المنديل يحبس الجراثيم.')),
+    qz('🪥',b('When should you brush your teeth?','متى يجب أن تنظف أسنانك؟'),[b('Only when they hurt','فقط عندما تؤلمني'),b('Once a month','مرة في الشهر'),b('Morning and night','صباحاً ومساءً')],2,b('Brush in the morning and at night.','نظّف أسنانك صباحاً ومساءً.'))
+  ],
+  nutrition:[
+    qz('🌈',b('Which foods are good for every day?','أي الأطعمة جيدة لكل يوم؟'),[b('Fruits and vegetables','الفواكه والخضروات'),b('Candy and soda','الحلوى والمشروبات الغازية'),b('Only chips','رقائق البطاطا فقط')],0,b('Fruits and vegetables give us vitamins.','الفواكه والخضروات تعطينا الفيتامينات.')),
+    qz('💧',b('Which drink is best for your body?','أي مشروب هو الأفضل لجسمك؟'),[b('Soda','مشروب غازي'),b('Energy drink','مشروب الطاقة'),b('Water','الماء')],2,b('Water is the best drink.','الماء هو أفضل مشروب.')),
+    qz('🍽️',b('What should fill half of your plate?','ماذا يجب أن يملأ نصف طبقك؟'),[b('Sweets','الحلويات'),b('Fruits and vegetables','الفواكه والخضروات'),b('French fries','البطاطا المقلية')],1,b('Half the plate: fruits and vegetables.','نصف الطبق: فواكه وخضروات.'))
+  ],
+  firstaid:[
+    qz('🩹',b('You have a small cut. What do you do first?','لديك جرح صغير. ماذا تفعل أولاً؟'),[b('Tell a grown-up and rinse with clean water','أخبر شخصاً بالغاً وأشطفه بماء نظيف'),b('Rub dirt on it','أفرك عليه تراباً'),b('Hide it','أخفيه')],0,b('Clean water and a grown-up help the most.','الماء النظيف والشخص البالغ هما الأفضل.')),
+    qz('👃',b('Your nose is bleeding. How do you sit?','أنفك ينزف. كيف تجلس؟'),[b('Lie flat','أستلقي'),b('Tilt my head back','أرجع رأسي للخلف'),b('Sit and lean forward','أجلس وأميل للأمام')],2,b('Sit and lean forward, and tell a grown-up.','اجلس ومِل للأمام وأخبر شخصاً بالغاً.')),
+    qz('🔥',b('You touched something hot. What cools the burn?','لمست شيئاً ساخناً. ما الذي يبرّد الحرق؟'),[b('Cool running water','ماء جارٍ بارد'),b('Butter','زبدة'),b('Popping blisters','فقء الفقاعات')],0,b('Cool running water, and tell a grown-up.','ماء جارٍ بارد وأخبر شخصاً بالغاً.'))
+  ],
+  safety:[
+    qz('💊',b('You find pills that look like candy. What do you do?','وجدت حبوباً تشبه الحلوى. ماذا تفعل؟'),[b('Taste one','أتذوق واحدة'),b('Tell a grown-up and do not touch','أخبر شخصاً بالغاً ولا ألمسها'),b('Share with friends','أشاركها مع أصدقائي')],1,b('Medicine is not candy.','الدواء ليس حلوى.')),
+    qz('🚸',b('Where do we cross the road?','أين نعبر الطريق؟'),[b('At the crossing, on green, with a grown-up','عند ممر المشاة، على الأخضر، مع شخص بالغ'),b('Between parked cars','بين السيارات المتوقفة'),b('Anywhere, fast','في أي مكان وبسرعة')],0,b('Use the crossing and wait for green.','استخدم ممر المشاة وانتظر الأخضر.')),
+    qz('🔌',b('What do we do with a wall socket?','ماذا نفعل مع مقبس الكهرباء؟'),[b('Poke a fork in','أدخل شوكة'),b('Never touch or poke it','لا ألمسه ولا أدخل فيه شيئاً'),b('Touch it with wet hands','ألمسه بيد مبللة')],1,b('Sockets can give a strong shock.','المقابس قد تعطي صعقة قوية.'))
+  ],
+  emergency:[
+    qz('🚨',b('Someone is badly hurt. What do you do?','شخص أُصيب إصابة بالغة. ماذا تفعل؟'),[b('Get a grown-up right away','أطلب شخصاً بالغاً فوراً'),b('Wait and see','أنتظر لأرى'),b('Hide','أختبئ')],0,b('Get a grown-up right away.','اطلب شخصاً بالغاً فوراً.')),
+    qz('🔔',b('The fire alarm rings. What do you do?','جرس الحريق يرنّ. ماذا تفعل؟'),[b('Go back for my toy','أعود لآخذ لعبتي'),b('Hide under my bed','أختبئ تحت سريري'),b('Walk out calmly, leave toys behind','أخرج بهدوء وأترك الألعاب')],2,b('Walk out calmly and never go back in.','اخرج بهدوء ولا تعد إلى الداخل.')),
+    qz('🛒',b('You are lost in a mall. Who can help?','أنت تائه في مركز تسوق. من يستطيع المساعدة؟'),[b('A worker in uniform','عامل بزيّ رسمي'),b('A stranger with candy','غريب معه حلوى'),b('Nobody','لا أحد')],0,b('Workers in uniform are safe helpers.','العمال بالزيّ الرسمي مساعدون آمنون.'))
+  ]
+};
+const PRE=[
+  qz('🧼',b('Before eating, we should…','قبل الأكل يجب أن…'),[b('Wash our hands','نغسل أيدينا'),b('Lick our fingers','نلعق أصابعنا'),b('Play in dirt','نلعب بالتراب')],0),
+  qz('🥦',b('Which food gives us the most vitamins?','أي طعام يعطينا فيتامينات أكثر؟'),[b('Lollipop','مصاصة'),b('Fries','بطاطا مقلية'),b('Broccoli','بروكلي')],2),
+  qz('🩹',b('A small cut is bleeding a little. Who do you tell?','جرح صغير ينزف قليلاً. من تخبر؟'),[b('Nobody','لا أحد'),b('A grown-up','شخصاً بالغاً'),b('Only a toy','لعبة فقط')],1),
+  qz('💊',b('Medicine looks like candy. You…','دواء يشبه الحلوى. أنت…'),[b('Never take it without a grown-up','لا أتناوله أبداً دون شخص بالغ'),b('Take it when hungry','أتناوله عندما أجوع'),b('Hide it','أخبئه')],0),
+  qz('🚨',b('Who can help in an emergency?','من يستطيع المساعدة في الطوارئ؟'),[b('A stranger','غريب'),b('A trusted grown-up','شخص بالغ موثوق'),b('Nobody','لا أحد')],1)
+];
+const POST=[
+  qz('🚽',b('After using the toilet, we…','بعد استخدام الحمام نقوم بـ…'),[b('Skip washing','تجاهل الغسل'),b('Wash hands with soap','غسل اليدين بالصابون'),b('Only wipe on clothes','المسح على الملابس فقط')],1,b('Always wash with soap after the toilet.','اغسل دائماً بالصابون بعد الحمام.')),
+  qz('🥛',b('Which drink is good for healthy bodies?','أي مشروب جيد للأجسام الصحية؟'),[b('Water or milk','الماء أو الحليب'),b('Soda','مشروب غازي'),b('Candy juice','عصير حلوى')],0,b('Water and milk are healthy drinks.','الماء والحليب مشروبان صحيان.')),
+  qz('🩸',b('There is a lot of blood and it will not stop. You…','هناك دم كثير ولا يتوقف. أنت…'),[b('Wait quietly alone','تنتظر بهدوء وحدك'),b('Shout for a grown-up now','تنادي شخصاً بالغاً الآن'),b('Hide it','تخفيه')],1,b('Heavy bleeding needs a grown-up right now.','النزيف الشديد يحتاج شخصاً بالغاً فوراً.')),
+  qz('🍳',b('The stove is hot. You…','الموقد ساخن. أنت…'),[b('Touch it to check','تلمسه لتتأكد'),b('Pour water on it','تسكب عليه ماء'),b('Stay away and ask a grown-up','تبتعد وتسأل شخصاً بالغاً')],2,b('Stay away from hot things.','ابتعد عن الأشياء الساخنة.')),
+  qz('🔥',b('There is a big fire. You…','هناك حريق كبير. أنت…'),[b('Get out and tell a grown-up','تخرج وتخبر شخصاً بالغاً'),b('Hide in a closet','تختبئ في خزانة'),b('Take your toys first','تأخذ ألعابك أولاً')],0,b('Get out and get help.','اخرج واطلب المساعدة.'))
+];
+
+/* ================= progress helpers ================= */
+const mKey=(w,m)=>w.id+'.'+m.id;
+const mDone=w=>w.ms.filter(m=>S.best[mKey(w,m)]).length;
+const quizPassed=w=>!!(S.quiz[w.id]&&S.quiz[w.id].best>=2);
+const worldDone=w=>mDone(w)===w.ms.length&&quizPassed(w);
+const unlocked=i=>i===0||worldDone(WORLDS[i-1]);
+const allWorldsDone=()=>WORLDS.every(worldDone);
+const totalStars=()=>Object.values(S.best).reduce((a,x)=>a+x,0)+WORLDS.reduce((a,w)=>a+(S.quiz[w.id]?S.quiz[w.id].best:0),0);
+const pct=(r)=>r?Math.round(r.score/r.total*100):0;
+
+const BADGES=[
+  {id:'first',e:'👣',n:b('First Step','الخطوة الأولى'),d:b('Finish any mission.','أنهِ أي مهمة.'),ok:()=>Object.keys(S.best).length>0},
+  {id:'starter',e:'📝',n:b('Starter','البداية'),d:b('Take the Starter Check.','أجرِ الاختبار القبلي.'),ok:()=>!!S.pre},
+  {id:'germ',e:'🦠',n:b('Germ Buster','محارب الجراثيم'),d:b('Finish the Germ Hunt.','أنهِ صيد الجراثيم.'),ok:()=>!!S.best['hygiene.germs']},
+  {id:'chef',e:'🍽️',n:b('Plate Chef','شيف الطبق'),d:b('Build a balanced plate.','ركّب طبقاً متوازناً.'),ok:()=>!!S.best['nutrition.plate']},
+  {id:'nurse',e:'🩹',n:b('Little Nurse','ممرض صغير'),d:b('Finish the Cut Rescue.','أنهِ إنقاذ الجرح.'),ok:()=>!!S.best['firstaid.cut']},
+  {id:'detective',e:'🔍',n:b('Hazard Spotter','كاشف الأخطار'),d:b('Finish Hazard House.','أنهِ بيت الأخطار.'),ok:()=>!!S.best['safety.house']},
+  {id:'crosser',e:'🚸',n:b('Safe Crosser','عابر آمن'),d:b('Cross the road safely.','اعبر الطريق بأمان.'),ok:()=>!!S.best['safety.road']},
+  {id:'w0',e:'🏙️',n:b('Hygiene Hero','بطل النظافة'),d:b('Complete Hygiene City.','أكمل مدينة النظافة.'),ok:()=>worldDone(WORLDS[0])},
+  {id:'w1',e:'🏝️',n:b('Nutrition Ninja','نينجا التغذية'),d:b('Complete Nutrition Island.','أكمل جزيرة التغذية.'),ok:()=>worldDone(WORLDS[1])},
+  {id:'w2',e:'❤️‍🩹',n:b('First Aid Ace','نجم الإسعاف'),d:b('Complete First Aid Adventure.','أكمل مغامرة الإسعاف الأولي.'),ok:()=>worldDone(WORLDS[2])},
+  {id:'w3',e:'🕵️',n:b('Safety Detective','محقق السلامة'),d:b('Complete Safety Detectives.','أكمل محققي السلامة.'),ok:()=>worldDone(WORLDS[3])},
+  {id:'w4',e:'🚒',n:b('Emergency Hero','بطل الطوارئ'),d:b('Complete Emergency Heroes.','أكمل أبطال الطوارئ.'),ok:()=>worldDone(WORLDS[4])},
+  {id:'perfect',e:'💯',n:b('Perfect Score','العلامة الكاملة'),d:b('Get 3 out of 3 in a world quiz.','احصل على ٣ من ٣ في اختبار عالم.'),ok:()=>Object.values(S.quiz).some(q=>q.best===3)},
+  {id:'s20',e:'🌟',n:b('Star Collector','جامع النجوم'),d:b('Collect 20 stars.','اجمع ٢٠ نجمة.'),ok:()=>totalStars()>=20},
+  {id:'s50',e:'🏅',n:b('Star Master','سيد النجوم'),d:b('Collect 50 stars.','اجمع ٥٠ نجمة.'),ok:()=>totalStars()>=50},
+  {id:'grad',e:'🎓',n:b('Health Hero Graduate','خريج بطل الصحة'),d:b('Finish all worlds and the Final Check.','أنهِ كل العوالم والاختبار البعدي.'),ok:()=>allWorldsDone()&&!!S.post}
+];
+function checkBadges(){
+  let news=[];
+  BADGES.forEach(bd=>{if(!S.badges[bd.id]&&bd.ok()){S.badges[bd.id]=Date.now();news.push(bd)}});
+  if(news.length){save();news.forEach((bd,k)=>setTimeout(()=>{toast(b(`${bd.e} ${L(U.badgeNew)} ${L(bd.n)}`,`${bd.e} ${L(U.badgeNew)} ${L(bd.n)}`),'star');sfx.win()},k*900));confetti(100)}
+  return news;
+}
+/* ================= app shell ================= */
+let route='home';
+const ROUTES=['home','age','map','tests','rewards','parents'];
+function setWorldVars(w){const r=document.documentElement.style;if(w){r.setProperty('--wc',w.c);r.setProperty('--wcd',w.cd);r.setProperty('--wcl',w.cl)}}
+function applyLang(){
+  const r=document.documentElement;r.lang=S.lang;r.dir=S.lang==='ar'?'rtl':'ltr';
+  document.title=L(U.appName);
+  document.body.dataset.age=S.age==='young'?'young':'older';
+}
+function renderTop(){
+  $('#topbar').innerHTML=`<button class="brand" data-go="home" aria-label="${L(U.nHome)}">${LOGO}<span>${L(U.appName)}</span></button>
+  <div class="hud"><span class="pill" title="${L(U.stars)}">${STAR(true)}<span>${N(totalStars())}</span></span>
+  <button class="ibtn" id="snd" aria-label="${L(b('Sound','الصوت'))}" aria-pressed="${S.sound}">${S.sound?ICON.sound:ICON.mute}</button>
+  <div class="seg" role="group" aria-label="Language"><button data-lang="en" class="${S.lang==='en'?'on':''}" lang="en">EN</button><button data-lang="ar" class="${S.lang==='ar'?'on':''}" lang="ar">عربي</button></div></div>`;
+  $('#nav').innerHTML=[['home','home',U.nHome],['map','map',U.nMap],['rewards','star',U.nRewards],['tests','test',U.nTests],['parents','people',U.nParents]].map(([r,i,l])=>`<button data-go="${r}" class="${route.split('-')[0]===r||(r==='map'&&route.startsWith('world'))?'on':''}" ${route===r?'aria-current="page"':''}>${ICON[i]}<span>${L(l)}</span></button>`).join('');
+}
+function go(r){
+  if(location.hash!=='#'+r)history.pushState?location.hash=r:0;else render();
+}
+window.addEventListener('hashchange',render);
+document.addEventListener('click',e=>{
+  const g=e.target.closest('[data-go]');
+  if(g){e.preventDefault();sfx.tap();closeStage();go(g.dataset.go);return}
+  const l=e.target.closest('[data-lang]');
+  if(l){S.lang=l.dataset.lang;save();applyLang();const st=!$('#stage').hidden;if(st){closeStage()}render();return}
+  if(e.target.closest('#snd')){S.sound=!S.sound;S.voice=S.sound;save();if(!S.sound){try{speechSynthesis.cancel()}catch(x){}}renderTop();toast(S.sound?b('Sound on','الصوت يعمل'):b('Sound off','الصوت متوقف'));return}
+});
+function render(){
+  runCleanup();
+  let r=(location.hash||'#home').slice(1);
+  if(!(ROUTES.includes(r)||r.startsWith('world-')))r='home';
+  if(r.startsWith('world-')){const wi=WORLDS.findIndex(w=>w.id===r.slice(6));if(wi<0||!unlocked(wi))r='map'}
+  route=r;applyLang();renderTop();
+  const v=$('#view');v.innerHTML='';
+  const page=h('<div class="view"></div>');v.appendChild(page);
+  ({home:vHome,age:vAge,map:vMap,tests:vTests,rewards:vRewards,parents:vParents})[r.split('-')[0]==='world'?'world':r]?.(page);
+  if(r.startsWith('world-'))vWorld(page,WORLDS.find(w=>w.id===r.slice(6)));
+  setWorldVars(r.startsWith('world-')?WORLDS.find(w=>w.id===r.slice(6)):null);
+  if(!r.startsWith('world-'))setWorldVars({c:'#2BA8E8',cd:'#176E9E',cl:'#D7F1FF'});
+  scrollTo(0,0);
+}
+
+/* ---------- Home ---------- */
+function vHome(p){
+  const done=WORLDS.filter(worldDone).length;
+  const pctAll=Math.round((WORLDS.reduce((a,w)=>a+mDone(w)+(quizPassed(w)?1:0),0))/(WORLDS.reduce((a,w)=>a+w.ms.length+1,0))*100);
+  p.innerHTML=`<section class="hero"><div class="hero-text"><span class="tag">${L(U.tagline)}</span><h1>${L(U.welcome).replace(/(Health Hero|بطل الصحة)/,'<em>$1</em>')}</h1><p style="font-weight:700;color:var(--ink2);max-width:34ch">${L(b('Join Nurse Luna and Health Bot on five adventures. Play games, solve puzzles and earn Health Stars!','انضم إلى الممرضة لونا والروبوت الصحي في خمس مغامرات. العب وحُلّ الألغاز واكسب نجوم الصحة!'))}</p><button class="btn big coral" data-go="${S.age?'map':'age'}">${ICON.play}<span>${L(U.start)}</span></button></div>
+  <div class="hero-art"><div class="bubble" id="bubble">${L(U.lunaLines[0])}</div>${lunaSVG('luna')}${botSVG('bot')}</div></section>
+  <div class="sect-h"><h2>${L(U.worldsTitle)}</h2></div><div class="wrow">${WORLDS.map((w,i)=>`<button class="wmini ${unlocked(i)?'':'lock'}" style="--wc:${w.c};--wcd:${w.cd};--wcl:${w.cl}" data-open="${i}">${unlocked(i)?'':`<span class="lockbadge">${ICON.lock}</span>`}${WICON[w.id]}<span>${L(w.n)}</span><span class="dots">${w.ms.map(m=>`<i class="${S.best[mKey(w,m)]?'on':''}"></i>`).join('')}<i class="${quizPassed(w)?'on':''}"></i></span></button>`).join('')}</div>
+  <div class="sect-h"><h2>${L(U.yourProgress)}</h2></div><div class="card"><div class="bar" role="progressbar" aria-valuenow="${pctAll}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pctAll}%"></i></div><div class="stat-row" style="margin-top:14px"><div class="stat"><b>${N(totalStars())}</b><span>${L(U.stars)}</span></div><div class="stat"><b>${N(done)}/${N(5)}</b><span>${L(b('Worlds done','عوالم منتهية'))}</span></div><div class="stat"><b>${N(Object.keys(S.badges).length)}/${N(BADGES.length)}</b><span>${L(U.tBadges)}</span></div></div></div>`;
+  let k=0;const bub=$('#bubble',p);
+  const iv=setInterval(()=>{k++;bub.textContent=L(k%2?U.botLines[(k>>1)%3]:U.lunaLines[(k>>1)%3])},4500);onCleanup(()=>clearInterval(iv));
+  $('.luna',p).onclick=()=>{sfx.pop();const t=U.lunaLines[Math.random()*3|0];bub.textContent=L(t);say(t,true)};
+  $('.bot',p).onclick=()=>{sfx.pop();const t=U.botLines[Math.random()*3|0];bub.textContent=L(t);say(t,true)};
+  p.addEventListener('click',e=>{const o=e.target.closest('[data-open]');if(o)openWorld(+o.dataset.open)});
+}
+function openWorld(i){
+  if(!S.age){go('age');return}
+  if(!unlocked(i)){sfx.no();toast(U.lockedMsg);return}
+  sfx.tap();go('world-'+WORLDS[i].id);
+}
+
+/* ---------- Age ---------- */
+function vAge(p){
+  const card=(k,n,t,d,big)=>`<button class="card agecard ${S.age===k?'sel':''}" data-age="${k}">${k==='young'?lunaSVG('').replace('<svg','<svg style="width:120px"'):botSVG('').replace('<svg','<svg style="width:110px"')}<div class="big-n">${big}</div><h3>${L(t)}</h3><p style="font-weight:700;color:var(--ink2)">${L(d)}</p></button>`;
+  p.innerHTML=`<h1 style="font-size:clamp(2rem,7vw,3rem)">${L(U.ageTitle)}</h1><p style="font-weight:700;color:var(--ink2);margin-top:6px">${L(U.ageSub)}</p><div class="agegrid">${card('young',0,U.age1t,U.age1d,L(U.age1))}${card('older',0,U.age2t,U.age2d,L(U.age2))}</div><p style="text-align:center;margin-top:18px;font-weight:700;color:var(--ink2)">${L(U.ageNote)}</p>`;
+  p.addEventListener('click',e=>{const a=e.target.closest('[data-age]');if(!a)return;S.age=a.dataset.age;save();sfx.ok();say(b('Let\'s go!','هيا بنا!'));applyLang();go('map')});
+  if(S.age==='young')say(U.ageTitle);
+}
+
+/* ---------- Map ---------- */
+function vMap(p){
+  if(!S.age){go('age');return}
+  const next=WORLDS.findIndex((w,i)=>unlocked(i)&&!worldDone(w));
+  p.innerHTML=`<div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:end"><div><h1 style="font-size:clamp(2rem,7vw,3rem)">${L(U.mapTitle)}</h1><p style="font-weight:700;color:var(--ink2)">${L(U.mapSub)}</p></div><button class="btn ghost" data-go="age">${L(S.age==='young'?U.age1:U.age2)} · ${L(b('Change','تغيير'))}</button></div>
+  <div class="map" style="margin-top:22px">${WORLDS.map((w,i)=>{const open=unlocked(i),dn=mDone(w),tot=w.ms.length+1,done=dn+(quizPassed(w)?1:0);return `<button class="wcard ${open?'':'lock'}" style="--wc:${w.c};--wcd:${w.cd};--wcl:${w.cl}" data-open="${i}"><span class="step-n">${L(U.world)} ${N(i+1)}</span>${open?'':`<span class="lockbadge">${ICON.lock}</span>`}<div class="top-r">${WICON[w.id]}<div style="min-width:0"><h3>${L(w.n)}</h3><p>${L(w.d)}</p></div></div><div class="bar"><i style="width:${done/tot*100}%"></i></div><p>${open?`${N(done)} / ${N(tot)}`:L(U.lockedMsg)}${open&&i===next?` · <b style="color:${w.cd}">${L(b('Next up!','التالي!'))}</b>`:''}</p></button>`}).join('')}</div>`;
+  p.addEventListener('click',e=>{const o=e.target.closest('[data-open]');if(o)openWorld(+o.dataset.open)});
+}
+
+/* ---------- World ---------- */
+function stars3(n){return [1,2,3].map(k=>STAR(k<=n)).join('')}
+function vWorld(p,w){
+  const idx=WORLDS.indexOf(w),allM=mDone(w)===w.ms.length,q=S.quiz[w.id];
+  p.innerHTML=`<button class="back" data-go="map"><span class="rtlflip" style="display:inline-flex">${ICON.chev}</span>${L(U.backMap)}</button>
+  <div class="wbanner" style="background:${w.cd}">${WICON[w.id]}<div class="tx"><p style="font-family:var(--font-d);font-weight:800">${L(U.world)} ${N(idx+1)}</p><h1>${L(w.n)}</h1><p>${L(w.d)}</p></div></div>
+  <div class="sect-h"><h2>${L(U.missions)}</h2></div>
+  <div class="mgrid">${w.ms.map((m,k)=>`<button class="mcard ${S.best[mKey(w,m)]?'done':''}" data-m="${k}"><span class="me" aria-hidden="true">${m.e}</span><h3>${L(m.t)}</h3><span class="st">${stars3(S.best[mKey(w,m)]||0)}</span></button>`).join('')}
+  <button class="mcard quizc ${allM?'':'lock'}" data-quiz="1"><span class="me" style="background:#FFE9A8" aria-hidden="true">${allM?'🏆':'🔒'}</span><h3>${L(U.worldQuiz)}</h3><p style="font-weight:700;color:var(--ink2);font-size:.9rem">${L(allM?U.quizPass:U.quizLocked)}</p><span class="st">${stars3(q?q.best:0)}</span></button></div>
+  ${worldDone(w)&&idx<4?`<div class="banner"><div class="bt"><h3>🎉 ${L(U.worldDone)}</h3><p>${L(b('The next world is open!','العالم التالي مفتوح!'))}</p></div><button class="btn green" data-open="${idx+1}">${L(WORLDS[idx+1].n)}</button></div>`:''}
+  ${worldDone(w)&&idx===4?`<div class="banner"><div class="bt"><h3>🎉 ${L(U.worldDone)}</h3><p>${L(allWorldsDone()?(S.post?b('Your certificate is ready!','شهادتك جاهزة!'):b('Take the Final Check to get your certificate.','أجرِ الاختبار البعدي لتحصل على شهادتك.')):'')}</p></div><button class="btn green" data-go="${S.post?'rewards':'tests'}">${L(S.post?U.tCert:U.postT)}</button></div>`:''}`;
+  p.addEventListener('click',e=>{
+    const m=e.target.closest('[data-m]');if(m){sfx.tap();playMission(w,+m.dataset.m);return}
+    const qz=e.target.closest('[data-quiz]');if(qz){if(!allM){sfx.no();toast(U.quizLocked);return}sfx.tap();playQuiz(w);return}
+    const o=e.target.closest('[data-open]');if(o)openWorld(+o.dataset.open);
+  });
+}
+
+/* ---------- Stage (mission / quiz overlay) ---------- */
+function openStage(w,title,instr){
+  setWorldVars(w);const st=$('#stage');st.hidden=false;document.body.style.overflow='hidden';
+  st.innerHTML=`<div class="stage-top"><div class="in"><button class="ibtn" id="sx" aria-label="${L(U.close)}">${ICON.x}</button><h2>${L(title)}</h2><button class="ibtn say" id="sl" aria-label="${L(U.listen)}">${ICON.sound}</button></div></div><div class="in body"><div class="instr">${botSVG('').replace('<svg','<svg ')}<p id="ins">${L(instr||'')}</p></div><div class="game" id="game"></div></div>`;
+  $('#sx').onclick=()=>{closeStage();render()};
+  $('#sl').onclick=()=>say($('#ins').textContent,true);
+  if(S.age==='young'&&instr)say(instr);
+  st.scrollTop=0;return $('#game');
+}
+function closeStage(){const st=$('#stage');if(!st.hidden){runCleanup();st.hidden=true;st.innerHTML='';document.body.style.overflow=''}}
+function playMission(w,k){
+  const m=w.ms[k];let miss=0;
+  const box=openStage(w,m.t,m.i);
+  const ctx={age:S.age==='young'?'young':'older',miss:()=>{miss++},win:()=>missionWin(w,k,miss)};
+  m.run(box,ctx);
+}
+function missionWin(w,k,miss){
+  const m=w.ms[k],n=miss===0?3:miss<=2?2:1,key=mKey(w,m),old=S.best[key]||0;
+  S.best[key]=Math.max(old,n);save();
+  const wasDone=mDone(w)===w.ms.length;
+  sfx.win();confetti();
+  const g=$('#game');if(!g)return;runCleanup();
+  const nxt=k+1<w.ms.length;
+  g.innerHTML=`<div class="card result"><h2>${L(U.missionDone)}</h2><div class="stars-big">${stars3(n)}</div><p style="font-weight:800">${L(U.great)} ${n===3?L(b('Perfect!','ممتاز!')):''}</p><div class="acts">${nxt?`<button class="btn green" id="nx">${L(U.nextMission)}</button>`:`<button class="btn green" id="nx">${L(U.worldQuiz)}</button>`}<button class="btn ghost" id="rp">${L(U.replay)}</button><button class="btn ghost" id="bk">${L(U.backWorld)}</button></div></div>`;
+  say(U.great);
+  $('#nx').onclick=()=>{if(nxt)playMission(w,k+1);else{closeStage();render();if(mDone(w)===w.ms.length)playQuiz(w)}};
+  $('#rp').onclick=()=>playMission(w,k);
+  $('#bk').onclick=()=>{closeStage();render()};
+  checkBadges();renderTop();
+}
+function playQuiz(w){
+  const box=openStage(w,b(`${L(w.n)}: ${L(U.worldQuiz)}`,`${L(w.n)}: ${L(U.worldQuiz)}`),U.quizPass);
+  runQuiz(box,shuffle(QUIZ[w.id]),{feedback:true,voice:S.age==='young',onEnd:sc=>{
+    const prev=S.quiz[w.id];const was=worldDone(w);
+    S.quiz[w.id]={best:Math.max(prev?prev.best:0,sc),last:sc};save();
+    const pass=sc>=2;sfx[pass?'win':'no']();if(pass)confetti();
+    box.innerHTML=`<div class="card result"><h2>${pass?L(U.worldDone):L(b('Almost there!','اقتربت!'))}</h2><div class="stars-big">${stars3(sc)}</div><p style="font-weight:800">${L(U.scoreOf).replace('{a}',N(sc)).replace('{t}',N(3))}</p><p style="color:var(--ink2);font-weight:700">${pass?'':L(b('Score 2 out of 3 to finish the world. Play the missions again and try once more!','احصل على ٢ من ٣ لتنهي العالم. العب المهام مرة أخرى وحاول ثانية!'))}</p><div class="acts"><button class="btn ghost" id="again">${L(U.replay)}</button><button class="btn green" id="bk">${L(U.backWorld)}</button></div></div>`;
+    $('#again').onclick=()=>playQuiz(w);
+    $('#bk').onclick=()=>{closeStage();render()};
+    checkBadges();renderTop();
+  }});
+}
+
+/* ---------- Tests ---------- */
+function vTests(p){
+  const res=(label,r)=>`<div class="r"><span>${L(label)}</span><div class="tr"><i style="width:${pct(r)}%;background:${r?'#4FC667':'#C9D5E6'}"></i></div><span>${r?N(pct(r))+'%':'–'}</span></div>`;
+  const grew=S.pre&&S.post&&S.post.score>S.pre.score;
+  p.innerHTML=`<h1 style="font-size:clamp(2rem,7vw,3rem)">${L(U.testsTitle)}</h1>
+  <div class="map" style="margin-top:18px">
+   <div class="card" style="display:flex;flex-direction:column;gap:10px;align-items:flex-start"><span style="font-size:3rem">📝</span><h2>${L(U.preT)}</h2><p style="font-weight:700;color:var(--ink2)">${L(U.preD)}</p><button class="btn blue" data-t="pre">${L(S.pre?U.retake:U.takeIt)}</button></div>
+   <div class="card" style="display:flex;flex-direction:column;gap:10px;align-items:flex-start"><span style="font-size:3rem">${allWorldsDone()?'🎯':'🔒'}</span><h2>${L(U.postT)}</h2><p style="font-weight:700;color:var(--ink2)">${L(allWorldsDone()?U.postD:U.postLocked)}</p><button class="btn violet" data-t="post" ${allWorldsDone()?'':'disabled'}>${L(S.post?U.retake:U.takeIt)}</button></div>
+  </div>
+  <div class="sect-h"><h2>${L(U.results)}</h2></div>
+  <div class="card"><div class="cmp">${res(U.before,S.pre)}${res(U.after,S.post)}</div>${grew?`<p style="margin-top:12px;font-weight:800;color:var(--good)">🎉 ${L(U.growth)} +${N(pct(S.post)-pct(S.pre))}%</p>`:''}${!S.pre&&!S.post?`<p style="margin-top:10px;font-weight:700;color:var(--ink2)">${L(U.noResult)}</p>`:''}</div>
+  <div class="sect-h"><h2>${L(b('World quizzes','اختبارات العوالم'))}</h2></div>
+  <div class="wres">${WORLDS.map(w=>{const q=S.quiz[w.id];return `<div class="it" style="--wc:${w.c};--wcd:${w.cd};--wcl:${w.cl}"><h4>${L(w.n)}</h4><div class="bar"><i style="width:${q?q.best/3*100:0}%"></i></div><span style="font-weight:800">${q?`${N(q.best)} / ${N(3)}`:L(U.noResult)}</span><span style="display:flex">${stars3(q?q.best:0).replace(/<svg/g,'<svg width="22" height="22"')}</span></div>`}).join('')}</div>`;
+  p.addEventListener('click',e=>{
+    const t=e.target.closest('[data-t]');if(!t||t.disabled)return;sfx.tap();
+    const kind=t.dataset.t,qs=kind==='pre'?PRE:POST;
+    const box=openStage({c:'#2BA8E8',cd:'#176E9E',cl:'#D7F1FF'},kind==='pre'?U.preT:U.postT,kind==='pre'?U.preD:U.postD);
+    runQuiz(box,qs,{feedback:kind==='post',voice:S.age==='young',onEnd:sc=>{
+      S[kind]={score:sc,total:qs.length,t:Date.now()};save();sfx.win();confetti();
+      box.innerHTML=`<div class="card result"><h2>${L(U.great)}</h2><div class="stars-big">${stars3(Math.round(sc/qs.length*3))}</div><p style="font-weight:800;font-size:1.3rem">${L(U.scoreOf).replace('{a}',N(sc)).replace('{t}',N(qs.length))}</p><div class="acts"><button class="btn green" id="bk">${L(U.ok)}</button></div></div>`;
+      $('#bk').onclick=()=>{closeStage();render()};checkBadges();renderTop();
+    }});
+  });
+}
+
+/* ---------- Rewards ---------- */
+function vRewards(p){
+  const tab=S.tab||'badges';
+  p.innerHTML=`<h1 style="font-size:clamp(2rem,7vw,3rem)">${L(U.rewardsTitle)}</h1>
+  <div class="stat-row" style="margin-top:14px"><div class="stat"><b>${N(totalStars())}</b><span>${L(U.stars)}</span></div><div class="stat"><b>${N(Object.keys(S.badges).length)}/${N(BADGES.length)}</b><span>${L(U.tBadges)}</span></div><div class="stat"><b>${N(WORLDS.filter(worldDone).length)}/${N(5)}</b><span>${L(b('Worlds done','عوالم منتهية'))}</span></div></div>
+  <div class="tabs" role="tablist">${[['badges',U.tBadges],['hero',U.tHero],['cert',U.tCert]].map(([k,l])=>`<button role="tab" aria-selected="${tab===k}" class="${tab===k?'on':''}" data-tab="${k}">${L(l)}</button>`).join('')}</div><div id="tabbody"></div>`;
+  const body=$('#tabbody',p);
+  const draw=()=>{
+    const t=S.tab||'badges';
+    if(t==='badges'){
+      body.innerHTML=`<div class="bgrid">${BADGES.map(bd=>`<div class="badge ${S.badges[bd.id]?'':'off'}"><div class="coin" aria-hidden="true">${bd.e}</div><h4>${L(bd.n)}</h4><p>${L(bd.d)}</p></div>`).join('')}</div>`;
+    }else if(t==='hero'){
+      const st=totalStars();
+      body.innerHTML=`<div class="cust"><div class="prev">${avatarSVG(S.hero.cape,S.hero.acc)}<h3 style="margin-top:6px">${L(NICKS[S.hero.nick])}</h3></div><div><h3>${L(U.cape)}</h3><div class="opt-row">${CAPES.map((c,k)=>`<button class="sw ${S.hero.cape===k?'on':''}" style="background:${c}" data-cape="${k}" aria-label="${L(U.cape)} ${N(k+1)}"></button>`).join('')}</div><h3>${L(U.acc)}</h3><div class="opt-row">${ACCS.map((a,k)=>`<button class="chipb ${S.hero.acc===k?'on':''}" data-acc="${k}" ${st<a.at?'disabled':''}>${st<a.at?'🔒 ':''}${L(a.n)}${st<a.at?` · ${L(U.unlockAt).replace('{n}',N(a.at))}`:''}</button>`).join('')}</div><h3>${L(U.nick)}</h3><div class="opt-row">${NICKS.map((n,k)=>`<button class="chipb ${S.hero.nick===k?'on':''}" data-nick="${k}">${L(n)}</button>`).join('')}</div></div></div>`;
+    }else{
+      if(!(allWorldsDone()&&S.post)){body.innerHTML=`<div class="card lockbox"><div style="font-size:3.5rem">🔒</div><h2>${L(U.certTitle)}</h2><p style="font-weight:700;color:var(--ink2);max-width:40ch">${L(U.certLocked)}</p><button class="btn green" data-go="${allWorldsDone()?'tests':'map'}">${L(allWorldsDone()?U.postT:U.mapTitle)}</button></div>`;return}
+      body.innerHTML=`<div class="cert"><div class="frame">${LOGO.replace('<svg','<svg style="width:70px"')}<h2>${L(U.certTitle)}</h2><p style="font-weight:700">${L(b('This certificate is proudly given to','تُمنح هذه الشهادة بكل فخر إلى'))}</p><div class="nick">${L(NICKS[S.hero.nick])}</div>${avatarSVG(S.hero.cape,S.hero.acc)}<p style="font-weight:700;max-width:44ch">${L(U.certLine)}</p><p style="font-weight:800;color:#8A5A00">${STAR(true).replace('<svg','<svg width="20" height="20" style="vertical-align:-4px"')} ${N(totalStars())} ${L(U.starsEarned)} · ${N(pct(S.post))}%</p><div class="sig"><div>${L(b('Nurse Luna','الممرضة لونا'))}</div><div>${L(b('Health Bot','الروبوت الصحي'))}</div></div></div></div><p style="text-align:center;margin-top:12px;font-weight:700;color:var(--ink2)">${L(U.certKeep)}</p>`;
+      if(!S.certSeen){S.certSeen=1;save();confetti(180);sfx.win()}
+    }
+  };
+  draw();
+  p.addEventListener('click',e=>{
+    const tb=e.target.closest('[data-tab]');if(tb){S.tab=tb.dataset.tab;save();$$('.tabs button',p).forEach(x=>{x.classList.toggle('on',x===tb);x.setAttribute('aria-selected',x===tb)});draw();return}
+    let ch=false;const c=e.target.closest('[data-cape]'),a=e.target.closest('[data-acc]'),n=e.target.closest('[data-nick]');
+    if(c){S.hero.cape=+c.dataset.cape;ch=true}if(a&&!a.disabled){S.hero.acc=+a.dataset.acc;ch=true}if(n){S.hero.nick=+n.dataset.nick;ch=true}
+    if(ch){sfx.pop();save();draw()}
+  });
+}
+
+/* ---------- Parents ---------- */
+function vParents(p){
+  const T=(en,ar)=>L(b(en,ar));
+  p.innerHTML=`<h1 style="font-size:clamp(2rem,7vw,3rem)">${L(U.parentsTitle)}</h1>
+  <div class="prose card" style="margin-top:14px">
+  <h2>${T('About Health Heroes','عن أبطال الصحة')}</h2>
+  <p>${T('Health Heroes is a free learning game for children aged 5 to 10. Children learn everyday health and safety habits by playing: they wash hands, brush teeth, build balanced meals, practise first aid choices, hunt for hazards and rehearse what to do in an emergency.','أبطال الصحة لعبة تعليمية مجانية للأطفال من ٥ إلى ١٠ سنوات. يتعلم الأطفال عادات الصحة والسلامة اليومية بالتجربة: يغسلون أيديهم، وينظفون أسنانهم، ويركّبون وجبات متوازنة، ويتدربون على قرارات الإسعاف الأولي، ويبحثون عن الأخطار، ويتمرنون على ما يفعلونه في الطوارئ.')}</p>
+  <h2>${T('Five worlds','خمسة عوالم')}</h2><div class="wlist">${WORLDS.map(w=>`<div class="w" style="--wcl:${w.cl}">${WICON[w.id]}<div><b>${L(w.n)}</b><p>${L(w.ms.map(m=>m.t).reduce((a,t)=>a+(a?' · ':'')+L(t),''))}</p></div></div>`).join('')}</div>
+  <h2>${T('Learning approach','أسلوب التعلّم')}</h2><ul>
+   <li>${T('Learning by doing: children drag, tap, move and decide. Videos pause so children answer before the story continues.','التعلم بالممارسة: يسحب الطفل ويضغط ويتحرك ويقرر. تتوقف القصص المتحركة ليجيب الطفل قبل أن تكمل.')}</li>
+   <li>${T('Ages 5 to 7: larger pictures, spoken instructions, fewer items and short missions.','من ٥ إلى ٧ سنوات: صور أكبر وتعليمات منطوقة وعناصر أقل ومهام قصيرة.')}</li>
+   <li>${T('Ages 8 to 10: more items, multi-step missions and problem solving, such as the correct order of washing, looking left-right-left, and spotting hidden hazards.','من ٨ إلى ١٠ سنوات: عناصر أكثر ومهام متعددة الخطوات وحل مشكلات، مثل ترتيب خطوات الغسل، والنظر يساراً ثم يميناً ثم يساراً، وكشف الأخطار المخفية.')}</li>
+   <li>${T('Assessment: a Starter Check before playing, a quiz after each world, and a Final Check at the end. The Tests page shows before and after results.','التقييم: اختبار قبلي قبل اللعب، واختبار بعد كل عالم، واختبار بعدي في النهاية. تعرض صفحة الاختبارات النتائج قبل وبعد.')}</li></ul>
+  <h2>${T('Safety messages in the game','رسائل السلامة في اللعبة')}</h2><ul>
+   <li>${T('Children are never encouraged to handle a serious emergency alone. The answer to every serious situation is to get a trusted adult.','لا نشجع الأطفال أبداً على التعامل وحدهم مع حالة طوارئ خطيرة. الإجابة في كل موقف خطير هي طلب شخص بالغ موثوق.')}</li>
+   <li>${T('Minor injuries: rinse a scrape with clean water, cool a small burn under cool running water, and sit leaning forward for a nosebleed. Children are taught to tell a grown-up each time. Never butter, ice, or popping blisters.','الإصابات البسيطة: شطف الخدش بماء نظيف، وتبريد الحرق الصغير بماء جارٍ بارد، والجلوس مع الميل إلى الأمام عند الرعاف. يتعلم الأطفال إخبار شخص بالغ في كل مرة. لا زبدة ولا ثلج ولا فقء للفقاعات.')}</li>
+   <li>${T('This game teaches awareness. It does not replace first aid training for adults. In a real emergency, call your local emergency number.','هذه اللعبة تعلّم الوعي ولا تغني عن تدريب الكبار على الإسعاف الأولي. في الطوارئ الحقيقية اتصل برقم الطوارئ المحلي.')}</li></ul>
+  <h2>${T('Privacy','الخصوصية')}</h2><p>${T('We never ask for a name, email, photo or location. Hero names are picked from a list. Progress is saved only in this browser on this device. Nothing is sent anywhere.','لا نطلب أبداً اسماً أو بريداً إلكترونياً أو صورة أو موقعاً. تُختار أسماء الأبطال من قائمة. يُحفظ التقدم في هذا المتصفح وعلى هذا الجهاز فقط. ولا يُرسل أي شيء إلى أي مكان.')}</p>
+  <h2>${T('Tips for adults','نصائح للكبار')}</h2><ul><li>${T('Play the first mission together, then let your child lead.','العبوا المهمة الأولى معاً ثم دعوا طفلكم يقود.')}</li><li>${T('Ask: "What would you do at home?" after each world.','اسألوه بعد كل عالم: "ماذا ستفعل في البيت؟"')}</li><li>${T('Tap the speaker button in any mission to hear the instructions again.','اضغطوا على زر السماعة في أي مهمة لسماع التعليمات مرة أخرى.')}</li></ul></div>
+  <div class="sect-h"><h2>${T('Settings','الإعدادات')}</h2></div>
+  <div class="card" style="display:flex;flex-direction:column;gap:14px"><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><b>${L(b('Language','اللغة'))}</b><div class="seg big"><button data-lang="en" class="${S.lang==='en'?'on':''}">English</button><button data-lang="ar" class="${S.lang==='ar'?'on':''}">العربية</button></div></div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><b>${L(b('Level','المستوى'))}</b><div class="seg big"><button data-age2="young" class="${S.age==='young'?'on':''}">${L(U.age1)}</button><button data-age2="older" class="${S.age!=='young'?'on':''}">${L(U.age2)}</button></div></div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><b>${L(U.voiceOn)}</b><div class="seg big"><button data-v="1" class="${S.voice?'on':''}">${L(b('On','تشغيل'))}</button><button data-v="0" class="${S.voice?'':'on'}">${L(b('Off','إيقاف'))}</button></div></div>
+  <div id="rst"><button class="btn coral" id="rs">${L(U.resetT)}</button></div></div>`;
+  p.addEventListener('click',e=>{
+    const a=e.target.closest('[data-age2]');if(a){S.age=a.dataset.age2;save();applyLang();render();return}
+    const vv=e.target.closest('[data-v]');if(vv){S.voice=vv.dataset.v==='1';save();if(!S.voice){try{speechSynthesis.cancel()}catch(x){}}render();return}
+    if(e.target.closest('#rs')){$('#rst',p).innerHTML=`<p style="font-weight:800;margin-bottom:8px">${L(U.resetAsk)}</p><div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn coral" id="ry">${L(U.resetYes)}</button><button class="btn ghost" id="rn">${L(U.resetNo)}</button></div>`;return}
+    if(e.target.closest('#rn')){render();return}
+    if(e.target.closest('#ry')){const lang=S.lang;S={lang,age:null,sound:true,voice:true,best:{},quiz:{},pre:null,post:null,hero:{cape:0,acc:0,nick:0},badges:{},tab:'badges'};save();toast(b('Progress erased','تم مسح التقدم'));go('home');render()}
+  });
+}
+
+/* ---------- boot ---------- */
+function start(){applyLang();if(!location.hash)history.replaceState(null,'','#home');render()}
+window.claude?.hot?.ready?window.claude.hot.ready(start):start();
+window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#stage').hidden){closeStage();render()}});
+</script>
